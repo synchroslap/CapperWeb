@@ -11,6 +11,9 @@ from pretty_logging import Logging, UserError
 from spec_parse import UserSpec
 from text import parseText, wrapRegions, TextBox
 
+SPEC = None
+FONTS = None
+
 class Font:
     def __init__(self, path, height, color, stroke, strokeColor):
         self.path = path
@@ -249,11 +252,6 @@ def generateOutputs(textBoxes, art):
         fileSizeTable.append((capFile,
                               Logging.filesizeStr(capFile),
                               Logging.dimensionsStr(capFile)))
-        if args.open_on_exit:
-            imageViewerFromCommandLine = {'linux':'xdg-open',
-                                          'win32':'explorer',
-                                          'darwin':'open'}[sys.platform]
-            subprocess.run([imageViewerFromCommandLine, os.path.abspath(capFile)])
 
     colorMode = "RGBA" if outputFmt == "png" else "RGB"
 
@@ -299,10 +297,6 @@ def generateOutputs(textBoxes, art):
 
     Logging.subSection("Successfully generated all images!", 1, "green")
     Logging.table(fileSizeTable)
-
-    if args.spec_to_stdout:
-        Logging.header("Outputting autospec")
-        SPEC.outputFilledSpec()
 
 def main():
     textInfoTable = []
@@ -350,31 +344,3 @@ def main():
     Logging.subSection("Successfully manipulated text!", 1, "green")
     Logging.table(textInfoTable)
     generateOutputs(textBoxes, art)
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        prog="CaptionGenerator",
-        description="Generate a caption given a vaild .toml specification file",
-        epilog="Have fun writing!")
-    parser.add_argument("specification_file", help="The specification for your " \
-                        "caption. See the GitHub page for a guide on how it must " \
-                        "be formatted.")
-    parser.add_argument("-o", "--open_on_exit", action="store_true", help="If a " \
-                        "caption is generated, open it with your default image " \
-                        "viewer.")
-    parser.add_argument("-s", "--spec_to_stdout", action="store_true", help="Output " \
-                        "the complete specification, with all automatically filled " \
-                        "values, to the terminal.")
-    args = parser.parse_args()
-
-    colorama.init()
-    START_TIME = time.time()
-    try:
-        SPEC = UserSpec(args.specification_file)
-        FONTS = loadFonts(SPEC.characters, SPEC.text["base_font_height"]["value"])
-        main()
-        Logging.header(f"Program finished in {time.time()-START_TIME:.2f} seconds")
-        Logging.divider()
-    except UserError as e:
-        Logging.divider()
-        print(f"\nUserError: {e.message}")
