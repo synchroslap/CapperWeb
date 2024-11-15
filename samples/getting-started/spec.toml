@@ -1,0 +1,39 @@
+[image]
+art = "samples/getting-started/img.jpg"
+bg_color = "#54130C"
+
+[text]
+text = "samples/getting-started/text.txt"
+text_box_pos = "split"
+
+# https://unsplash.com/photos/a-person-in-a-garment-EpTIAbTlrg0
+credits = [
+	"Photo: Ryan Yao on Unsplash"
+]
+
+[output]
+base_filename = "test"
+output_directory = "samples/getting-started"
+outputs = ["caption", "autospec"]
+
+[[characters]]
+name = "serif"
+color = "#F0C7C2"
+font = "fonts/Noto_Serif/NotoSerif-Regular.ttf"
+
+[[characters]]
+name = "sans"
+color = "#C2EFF0"
+relative_height = 0.7
+font = "fonts/Noto_Sans/NotoSans-Regular.ttf"
+
+[[characters]]
+name = "em"
+color = "#FFFFFF"
+font = "fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
+
+[[characters]]
+name = "credits"
+color = "#54130C"
+relative_height = 0.7
+font = "fonts/Noto_Sans/NotoSans-Regular.ttf"
