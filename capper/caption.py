@@ -13,6 +13,7 @@ from text import parseText, wrapRegions, TextBox
 
 SPEC = None
 FONTS = None
+EXPORT_AUTOTOML = False
 
 class Font:
     def __init__(self, path, height, color, stroke, strokeColor):
@@ -252,6 +253,13 @@ def generateOutputs(textBoxes, art):
         fileSizeTable.append((capFile,
                               Logging.filesizeStr(capFile),
                               Logging.dimensionsStr(capFile)))
+        
+        # OPEN/DOWNLOAD ON EXIT GOES HERE TODO
+        # if args.open_on_exit:
+        #     imageViewerFromCommandLine = {'linux':'xdg-open',
+        #                                   'win32':'explorer',
+        #                                   'darwin':'open'}[sys.platform]
+        #     subprocess.run([imageViewerFromCommandLine, os.path.abspath(capFile)])
 
     colorMode = "RGBA" if outputFmt == "png" else "RGB"
 
@@ -297,6 +305,10 @@ def generateOutputs(textBoxes, art):
 
     Logging.subSection("Successfully generated all images!", 1, "green")
     Logging.table(fileSizeTable)
+
+    if EXPORT_AUTOTOML:
+        Logging.header("Outputting autospec")
+        SPEC.outputFilledSpec()
 
 def main():
     textInfoTable = []
@@ -344,3 +356,22 @@ def main():
     Logging.subSection("Successfully manipulated text!", 1, "green")
     Logging.table(textInfoTable)
     generateOutputs(textBoxes, art)
+
+# main method for running overall capper program and processing request from web end
+def processRequest(toml_dir: str):
+    colorama.init()
+    START_TIME = time.time()
+    try:
+        global SPEC
+        SPEC = UserSpec(toml_dir)
+        global FONTS
+        FONTS = loadFonts(SPEC.characters, SPEC.text["base_font_height"]["value"])
+        main()
+        Logging.header(f"Program finished in {time.time()-START_TIME:.2f} seconds")
+        Logging.divider()
+    except UserError as e:
+        Logging.divider()
+        print(f"\nUserError: {e.message}")
+
+if __name__ == '__main__':
+    processRequest("samples/getting-started/spec.toml")

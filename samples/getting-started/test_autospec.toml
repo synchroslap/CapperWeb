@@ -1,10 +1,10 @@
 [image]
-art = "../samples/getting-started/img.jpg"
+art = "samples/getting-started/img.jpg"
 bg_color = "#54130CFF"
 # image_height = 1490
 
 [text]
-text = "../samples/getting-started/text.txt"
+text = "samples/getting-started/text.txt"
 text_box_pos = "split"
 credits = ['Photo: Ryan Yao on Unsplash']
 # base_font_height = 30
@@ -16,7 +16,7 @@ credits = ['Photo: Ryan Yao on Unsplash']
 
 [output]
 outputs = ['caption', 'autospec']
-output_directory = "../samples/getting-started"
+output_directory = "samples/getting-started"
 base_filename = "test"
 # output_img_format = "png"
 # output_img_quality = 100
@@ -24,44 +24,44 @@ base_filename = "test"
 [[characters]]
 name = "serif"
 color = "#F0C7C2FF"
-font = "../fonts/Noto_Serif/NotoSerif-Regular.ttf"
+font = "fonts/Noto_Serif/NotoSerif-Regular.ttf"
 # relative_height = 1
 # stroke_width = 0
 # stroke_color = "#000000FF"
-# font_bold = "../fonts/Noto_Serif/NotoSerif-Bold.ttf"
-# font_italic = "../fonts/Noto_Serif/NotoSerif-Italic.ttf"
-# font_bolditalic = "../fonts/Noto_Serif/NotoSerif-BoldItalic.ttf"
+# font_bold = "fonts/Noto_Serif/NotoSerif-Bold.ttf"
+# font_italic = "fonts/Noto_Serif/NotoSerif-Italic.ttf"
+# font_bolditalic = "fonts/Noto_Serif/NotoSerif-BoldItalic.ttf"
 
 [[characters]]
 name = "sans"
 color = "#C2EFF0FF"
 relative_height = 0.700
-font = "../fonts/Noto_Sans/NotoSans-Regular.ttf"
+font = "fonts/Noto_Sans/NotoSans-Regular.ttf"
 # stroke_width = 0
 # stroke_color = "#000000FF"
-# font_bold = "../fonts/Noto_Sans/NotoSans-Bold.ttf"
-# font_italic = "../fonts/Noto_Sans/NotoSans-Italic.ttf"
-# font_bolditalic = "../fonts/Noto_Sans/NotoSans-BoldItalic.ttf"
+# font_bold = "fonts/Noto_Sans/NotoSans-Bold.ttf"
+# font_italic = "fonts/Noto_Sans/NotoSans-Italic.ttf"
+# font_bolditalic = "fonts/Noto_Sans/NotoSans-BoldItalic.ttf"
 
 [[characters]]
 name = "em"
 color = "#FFFFFFFF"
-font = "../fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
+font = "fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
 # relative_height = 1
 # stroke_width = 0
 # stroke_color = "#000000FF"
-# font_bold = "../fonts/Noto_Emoji/NotoEmoji-Bold.ttf"
-# font_italic = "../fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
-# font_bolditalic = "../fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
+# font_bold = "fonts/Noto_Emoji/NotoEmoji-Bold.ttf"
+# font_italic = "fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
+# font_bolditalic = "fonts/Noto_Emoji/NotoEmoji-Regular.ttf"
 
 [[characters]]
 name = "credits"
 color = "#54130CFF"
 relative_height = 0.700
-font = "../fonts/Noto_Sans/NotoSans-Regular.ttf"
+font = "fonts/Noto_Sans/NotoSans-Regular.ttf"
 # stroke_width = 0
 # stroke_color = "#000000FF"
-# font_bold = "../fonts/Noto_Sans/NotoSans-Bold.ttf"
-# font_italic = "../fonts/Noto_Sans/NotoSans-Italic.ttf"
-# font_bolditalic = "../fonts/Noto_Sans/NotoSans-BoldItalic.ttf"
+# font_bold = "fonts/Noto_Sans/NotoSans-Bold.ttf"
+# font_italic = "fonts/Noto_Sans/NotoSans-Italic.ttf"
+# font_bolditalic = "fonts/Noto_Sans/NotoSans-BoldItalic.ttf"
 
