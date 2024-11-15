@@ -1,0 +1,226 @@
+.image-preview {
+    min-height: 300px;
+    border: 2px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.image-preview img {
+    max-height: 300px;
+    object-fit: contain;
+}
+
+textarea#textEditor.form-control {
+    height: 300px !important;
+    min-height: 300px !important;
+    resize: none;
+}
+
+.speaker-list {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.speaker-entry {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+}
+
+.speaker-entry:last-child {
+    margin-bottom: 0;
+}
+
+.name-preview-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.name-input {
+    flex: 2;
+}
+
+.font-preview {
+    flex: 1;
+    min-width: 100px;
+    height: 34px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 0 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.form-label {
+    margin-bottom: 2px;
+    font-size: 0.75em;
+    white-space: nowrap;
+    color: #666;
+}
+
+.form-control, .form-select {
+    padding: 4px 8px;
+    font-size: 0.9em;
+    height: 34px;
+}
+
+.btn {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.color-picker-container {
+    width: 34px !important;
+    height: 34px !important;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    cursor: pointer;
+    background: white;
+    position: relative;
+}
+
+.pickr {
+    position: relative;
+}
+
+.pickr button {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 3px !important;
+}
+
+.pickr .pcr-button::before {
+    border-radius: 3px !important;
+}
+
+.number-input {
+    width: 55px !important;
+}
+
+.font-type-select {
+    width: 80px !important;
+}
+
+.format-controls {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    margin-bottom: 0;
+    min-height: 56px;
+    flex-wrap: nowrap;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: fit-content;
+}
+
+.insert-btn {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+    width: 70px;
+    white-space: nowrap;
+    padding: 4px 8px;
+}
+
+.insert-btn:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    color: white;
+}
+
+.insert-btn-group {
+    margin-left: auto;
+}
+
+/* Make all inputs use the same box-sizing */
+* {
+    box-sizing: border-box;
+}
+
+/* Ensure consistent heights for all form controls */
+.form-control:not(#textEditor), .form-select, .btn {
+    min-height: 34px;
+    max-height: 34px;
+}
+
+/* Ensure the name input and preview are aligned */
+.name-input .form-control {
+    width: 100%;
+}
+
+/* Ensure color inputs don't get squished */
+.control-group:has(.color-picker-container) {
+    min-width: 34px;
+    width: 34px;
+}
+
+/* Ensure number inputs don't get squished */
+.control-group:has(.number-input) {
+    min-width: 55px;
+    width: 55px;
+}
+
+/* Ensure font select doesn't get squished */
+.control-group:has(.font-type-select) {
+    min-width: 80px;
+    width: 80px;
+}
+
+/* Ensure insert button group doesn't get squished */
+.control-group:has(.insert-btn) {
+    min-width: 70px;
+    width: 70px;
+}
+
+/* Add hover effect for controls with tooltips */
+[title] {
+    cursor: help;
+}
+
+/* Ensure buttons use pointer cursor */
+button {
+    cursor: pointer;
+}
+
+/* Pickr customizations */
+.pcr-app {
+    background: #fff;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.pcr-app .pcr-interaction .pcr-type.active {
+    background: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.pcr-app .pcr-interaction .pcr-save {
+    background: #198754;
+}
+
+.pcr-app .pcr-interaction .pcr-cancel {
+    background: #dc3545;
+}

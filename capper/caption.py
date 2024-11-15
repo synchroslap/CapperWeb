@@ -14,6 +14,7 @@ from text import parseText, wrapRegions, TextBox
 SPEC = None
 FONTS = None
 EXPORT_AUTOTOML = False
+TOML_DIR = "request.toml"
 
 class Font:
     def __init__(self, path, height, color, stroke, strokeColor):
@@ -358,12 +359,12 @@ def main():
     generateOutputs(textBoxes, art)
 
 # main method for running overall capper program and processing request from web end
-def processRequest(toml_dir: str):
+def processRequest(imageName: str, ):
     colorama.init()
     START_TIME = time.time()
     try:
         global SPEC
-        SPEC = UserSpec(toml_dir)
+        SPEC = UserSpec(TOML_DIR)
         global FONTS
         FONTS = loadFonts(SPEC.characters, SPEC.text["base_font_height"]["value"])
         main()
@@ -372,6 +373,10 @@ def processRequest(toml_dir: str):
     except UserError as e:
         Logging.divider()
         print(f"\nUserError: {e.message}")
+
+# generates TOML from request parameters and returns text of TOML file
+def createTOML():
+    return
 
 if __name__ == '__main__':
     processRequest("samples/getting-started/spec.toml")
