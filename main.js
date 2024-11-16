@@ -87,6 +87,10 @@ function createCharacterEntry(charNum) {
             <div class="font-preview">Character ${charNum}</div>
         </div>
         <div class="format-controls">
+            <div class="control-group insert-btn-group">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-secondary insert-btn" title="Insert character tag">Insert</button>
+            </div>
             <div class="control-group">
                 <label class="form-label">Color</label>
                 <div class="color-picker-container" data-type="font"></div>
@@ -110,10 +114,6 @@ function createCharacterEntry(charNum) {
             <div class="control-group">
                 <label class="form-label">Stroke Color</label>
                 <div class="color-picker-container" data-type="stroke"></div>
-            </div>
-            <div class="control-group insert-btn-group">
-                <label class="form-label">&nbsp;</label>
-                <button class="btn btn-secondary insert-btn" title="Insert character tag">Insert</button>
             </div>
         </div>
     `;

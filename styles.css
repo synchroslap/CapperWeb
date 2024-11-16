@@ -151,7 +151,7 @@ textarea#textEditor.form-control {
 }
 
 .insert-btn-group {
-    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Make all inputs use the same box-sizing */
