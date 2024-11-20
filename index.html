@@ -39,7 +39,9 @@
             <div class="col-md-4">
                 <character-list 
                     v-model:characters="characters"
-                    @insert-tag="insertCharacterTag">
+                    :available-fonts="availableFonts"
+                    @insert-tag="insertCharacterTag"
+                    @font-upload="handleFontUpload">
                 </character-list>
             </div>
             <div class="col-12">

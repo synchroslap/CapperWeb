@@ -8,6 +8,14 @@ const CharacterList = {
                 <i class="bi bi-plus"></i> Add Character
             </button>
         </div>
+        <div class="mb-3">
+            <label class="form-label">Upload Font</label>
+            <input type="file" 
+                   class="form-control" 
+                   @change="handleFontUpload" 
+                   accept=".ttf"
+                   title="Upload TTF Font">
+        </div>
         <div class="speaker-list">
             <div v-for="(character, index) in characters" :key="index" class="speaker-entry">
                 <div class="name-preview-row">
@@ -45,9 +53,9 @@ const CharacterList = {
                                 v-model="character.fontType" 
                                 @change="updateCharacters"
                                 title="Font Type">
-                            <option value="Noto Sans">Sans</option>
-                            <option value="Noto Serif">Serif</option>
-                            <option value="Noto Emoji">Emoji</option>
+                            <option v-for="font in availableFonts" 
+                                    :key="font.path" 
+                                    :value="font.path">{{ font.name }}</option>
                         </select>
                     </div>
                     <div class="control-group">
@@ -80,10 +88,15 @@ const CharacterList = {
         characters: {
             type: Array,
             required: true
+        },
+        availableFonts: {
+            type: Array,
+            required: true,
+            default: () => []
         }
     },
 
-    emits: ['update:characters', 'insert-tag'],
+    emits: ['update:characters', 'insert-tag', 'font-upload'],
 
     data() {
         return {
@@ -92,11 +105,19 @@ const CharacterList = {
     },
 
     methods: {
+        handleFontUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.name.toLowerCase().endsWith('.ttf')) {
+                this.$emit('font-upload', file);
+            }
+        },
+
         addCharacter() {
             const newCharNum = this.characters.length + 1;
+            const defaultFont = this.availableFonts.length > 0 ? this.availableFonts[0].path : '';
             const newCharacter = {
                 name: `Character ${newCharNum}`,
-                fontType: 'Noto Sans',
+                fontType: defaultFont,
                 fontHeight: 1,
                 strokeWidth: 0,
                 fontColor: '#000000',
@@ -139,8 +160,9 @@ const CharacterList = {
         },
 
         getPreviewStyle(character) {
+            const font = this.availableFonts.find(f => f.path === character.fontType);
             return {
-                fontFamily: character.fontType,
+                fontFamily: font ? font.name : 'sans-serif',
                 fontSize: `${character.fontHeight * 16}px`,
                 color: character.fontColor,
                 WebkitTextStroke: `${character.strokeWidth}px ${character.strokeColor}`

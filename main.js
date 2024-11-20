@@ -14,6 +14,18 @@ async function loadPythonFile(filepath) {
     }
 }
 
+async function loadFontFile(filepath) {
+    try {
+        const response = await fetch(filepath);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+        }
+        return await response.arrayBuffer();
+    } catch (error) {
+        throw new Error(`Failed to load font ${filepath}: ${error.message}`);
+    }
+}
+
 const { createApp } = Vue;
 
 createApp({
@@ -25,7 +37,7 @@ createApp({
         return {
             characters: [{
                 name: 'Character 1',
-                fontType: 'Noto Sans',
+                fontType: '/fonts/Noto_Sans/NotoSans-Regular.ttf',
                 fontHeight: 1,
                 strokeWidth: 0,
                 fontColor: '#000000',
@@ -35,7 +47,8 @@ createApp({
             output: '',
             imagePreview: null,
             selectedFile: null,
-            initialized: false
+            initialized: false,
+            availableFonts: []
         }
     },
 
@@ -61,6 +74,38 @@ createApp({
             }
         },
 
+        async handleFontUpload(file) {
+            if (this.initialized && pyodideInstance) {
+                try {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    const fontPath = `/fonts/custom/${file.name}`;
+                    
+                    // Create custom fonts directory if it doesn't exist
+                    try {
+                        pyodideInstance.FS.mkdir('/fonts/custom');
+                    } catch (e) {
+                        // Directory might already exist
+                    }
+                    
+                    // Write the font file
+                    pyodideInstance.FS.writeFile(fontPath, uint8Array);
+                    
+                    // Add to available fonts
+                    const fontName = file.name.replace('.ttf', '').replace('.TTF', '').replace(/([A-Z])/g, ' $1').trim();
+                    this.availableFonts.push({
+                        name: fontName,
+                        path: fontPath
+                    });
+
+                    this.output = `Font ${fontName} uploaded successfully!`;
+                } catch (error) {
+                    this.output = `Error uploading font: ${error.message}`;
+                    console.error('Font upload error:', error);
+                }
+            }
+        },
+
         insertCharacterTag(name) {
             const tag = `[${name}]`;
             const textarea = document.querySelector('textarea');
@@ -75,6 +120,62 @@ createApp({
                 textarea.selectionStart = textarea.selectionEnd = start + tag.length;
                 textarea.focus();
             });
+        },
+
+        scanFonts() {
+            const fonts = [];
+            const fontDirs = ['Noto_Sans', 'Noto_Serif', 'Noto_Emoji'];
+            
+            for (const dir of fontDirs) {
+                try {
+                    const files = pyodideInstance.FS.readdir(`/fonts/${dir}`);
+                    for (const file of files) {
+                        if (file.endsWith('.ttf')) {
+                            const fontPath = `/fonts/${dir}/${file}`;
+                            const fontName = file.replace('.ttf', '')
+                                              .replace(/([A-Z])/g, ' $1')
+                                              .trim();
+                            fonts.push({
+                                name: fontName,
+                                path: fontPath
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Could not read directory /fonts/${dir}:`, e);
+                }
+            }
+
+            // Also scan custom fonts directory if it exists
+            try {
+                const customFiles = pyodideInstance.FS.readdir('/fonts/custom');
+                for (const file of customFiles) {
+                    if (file.endsWith('.ttf')) {
+                        const fontPath = `/fonts/custom/${file}`;
+                        const fontName = file.replace('.ttf', '')
+                                           .replace(/([A-Z])/g, ' $1')
+                                           .trim();
+                        fonts.push({
+                            name: fontName,
+                            path: fontPath
+                        });
+                    }
+                }
+            } catch (e) {
+                // Custom fonts directory might not exist yet
+            }
+
+            this.availableFonts = fonts;
+            
+            // Update any characters using fonts that no longer exist
+            if (fonts.length > 0) {
+                const defaultFont = fonts[0].path;
+                this.characters.forEach(char => {
+                    if (!fonts.some(f => f.path === char.fontType)) {
+                        char.fontType = defaultFont;
+                    }
+                });
+            }
         },
 
         async generate() {
@@ -134,6 +235,10 @@ createApp({
                     ])
                 `);
 
+                // Load fonts
+                this.output = 'Loading fonts...';
+                await this.loadFonts();
+
                 // Load Python files
                 this.output = 'Loading Python source files...';
                 const pythonFiles = {
@@ -178,6 +283,42 @@ createApp({
                 console.error(errorMsg, error);
                 throw error;
             }
+        },
+
+        async loadFonts() {
+            // Create fonts directory structure
+            try {
+                pyodideInstance.FS.mkdir('/fonts');
+                pyodideInstance.FS.mkdir('/fonts/Noto_Sans');
+                pyodideInstance.FS.mkdir('/fonts/Noto_Serif');
+                pyodideInstance.FS.mkdir('/fonts/Noto_Emoji');
+            } catch (e) {
+                console.log('Font directories may already exist');
+            }
+
+            // Define font files to load
+            const fontFiles = {
+                'Noto_Sans': ['NotoSans-Regular.ttf', 'NotoSans-Bold.ttf', 'NotoSans-Italic.ttf', 'NotoSans-BoldItalic.ttf'],
+                'Noto_Serif': ['NotoSerif-Regular.ttf', 'NotoSerif-Bold.ttf', 'NotoSerif-Italic.ttf', 'NotoSerif-BoldItalic.ttf'],
+                'Noto_Emoji': ['NotoEmoji-Regular.ttf', 'NotoEmoji-Light.ttf', 'NotoEmoji-Medium.ttf', 'NotoEmoji-SemiBold.ttf', 'NotoEmoji-Bold.ttf']
+            };
+
+            // Load each font file
+            for (const [family, files] of Object.entries(fontFiles)) {
+                for (const file of files) {
+                    try {
+                        const fontData = await loadFontFile(`fonts/${family}/${file}`);
+                        const uint8Array = new Uint8Array(fontData);
+                        pyodideInstance.FS.writeFile(`/fonts/${family}/${file}`, uint8Array);
+                        console.log(`Loaded font: ${family}/${file}`);
+                    } catch (error) {
+                        console.error(`Failed to load font ${family}/${file}:`, error);
+                    }
+                }
+            }
+
+            // Scan available fonts after loading
+            this.scanFonts();
         }
     },
 
