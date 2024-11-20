@@ -23,19 +23,84 @@
 </head>
 <body class="py-4">
     <div id="app" class="container-fluid">
+        <!-- Project Name Input -->
+        <div class="row project-name-container">
+            <div class="col-4">
+                <div class="form-group">
+                    <label class="form-label">Project Name</label>
+                    <input type="text" class="form-control" v-model="projectName" placeholder="Enter project name">
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
             <div class="col-md-4">
                 <h3 class="mb-3">Image Upload</h3>
-                <div class="image-preview" id="imagePreview">
-                    <img v-if="imagePreview" :src="imagePreview" alt="Preview">
-                    <span v-else>No image selected</span>
+                <div class="form-group">
+                    <div class="image-preview" id="imagePreview">
+                        <img v-if="imagePreview" :src="imagePreview" alt="Preview">
+                        <span v-else>No image selected</span>
+                    </div>
+                    <input type="file" @change="handleImageUpload" accept="image/*" class="form-control">
                 </div>
-                <input type="file" @change="handleImageUpload" accept="image/*" class="form-control">
+                
+                <!-- Background Color Section -->
+                <div class="bg-color-section">
+                    <div class="form-group mb-0">
+                        <label class="form-label">Background Color</label>
+                        <div class="bg-color-container">
+                            <div id="bgColorPicker" class="color-picker-container"></div>
+                            <small class="text-muted">Click to choose color</small>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="col-md-4">
                 <h3 class="mb-3">Text Editor</h3>
-                <textarea v-model="textContent" class="form-control mb-3" placeholder="Enter your text here..."></textarea>
+                <div class="form-group">
+                    <textarea v-model="textContent" class="form-control text-editor-tall" placeholder="Enter your text here..."></textarea>
+                </div>
+                
+                <div class="text-controls">
+                    <div class="row">
+                        <!-- Position Dropdown -->
+                        <div class="form-group col-6">
+                            <label class="form-label">Text Position</label>
+                            <select class="form-select" v-model="textPosition">
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                                <option value="split">Split</option>
+                            </select>
+                        </div>
+
+                        <!-- Alignment Dropdown -->
+                        <div class="form-group col-6">
+                            <label class="form-label">Text Alignment</label>
+                            <select class="form-select" v-model="textAlignment">
+                                <option value="left">Left</option>
+                                <option value="right">Right</option>
+                                <option value="center">Center</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Credits Section -->
+                    <div class="form-group">
+                        <div class="credits-section">
+                            <label class="form-label">Credits</label>
+                            <textarea v-model="credits" class="form-control credits-input" placeholder="Enter credits..."></textarea>
+                            <select class="form-select" v-model="creditsPosition">
+                                <option value="top-left">Top Left</option>
+                                <option value="top-right">Top Right</option>
+                                <option value="bottom-left">Bottom Left</option>
+                                <option value="bottom-right">Bottom Right</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="col-md-4">
                 <character-list 
                     v-model:characters="characters"
@@ -44,10 +109,11 @@
                     @font-upload="handleFontUpload">
                 </character-list>
             </div>
-            <div class="col-12">
+
+            <div class="col-12 generate-button-container">
                 <button @click="generate" class="btn btn-success">Generate</button>
             </div>
-            <div class="col-12">
+            <div class="col-12 output-container">
                 <div class="bg-light p-3 rounded">{{ output }}</div>
             </div>
         </div>

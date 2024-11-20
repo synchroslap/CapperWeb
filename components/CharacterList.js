@@ -59,7 +59,7 @@ const CharacterList = {
                         </select>
                     </div>
                     <div class="control-group">
-                        <label class="form-label">Rel. Height</label>
+                        <label class="form-label">Height</label>
                         <input type="number" class="form-control number-input" 
                                v-model="character.fontHeight" 
                                @input="updateCharacters"

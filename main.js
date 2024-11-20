@@ -35,6 +35,7 @@ createApp({
 
     data() {
         return {
+            projectName: '',
             characters: [{
                 name: 'Character 1',
                 fontType: '/fonts/Noto_Sans/NotoSans-Regular.ttf',
@@ -44,11 +45,17 @@ createApp({
                 strokeColor: '#ffffff'
             }],
             textContent: '',
+            textPosition: 'left',
+            textAlignment: 'left',
+            credits: '',
+            creditsPosition: 'bottom-right',
+            backgroundColor: '#ffffff',
             output: '',
             imagePreview: null,
             selectedFile: null,
             initialized: false,
-            availableFonts: []
+            availableFonts: [],
+            bgColorPicker: null
         }
     },
 
@@ -178,6 +185,41 @@ createApp({
             }
         },
 
+        initializeBackgroundColorPicker() {
+            const pickrConfig = {
+                theme: 'nano',
+                swatches: [
+                    '#ffffff', '#000000', '#808080', '#c0c0c0',
+                    '#ff0000', '#00ff00', '#0000ff', '#ffff00',
+                    '#00ffff', '#ff00ff'
+                ],
+                components: {
+                    preview: true,
+                    opacity: true,
+                    hue: true,
+                    interaction: {
+                        hex: true,
+                        rgba: true,
+                        input: true,
+                        save: true
+                    }
+                }
+            };
+
+            this.bgColorPicker = Pickr.create({
+                ...pickrConfig,
+                el: '#bgColorPicker',
+                default: "#aaaaaa"
+            });
+
+            this.bgColorPicker.on('save', (color) => {
+                if (color) {
+                    this.backgroundColor = color.toHEXA().toString();
+                }
+                this.bgColorPicker.hide();
+            });
+        },
+
         async generate() {
             try {
                 if (!this.initialized) {
@@ -203,12 +245,23 @@ createApp({
                     };
                 });
 
-                // Convert font settings to Python dict string
-                const fontSettingsStr = JSON.stringify(fontSettings).replace(/"/g, "'");
+                // Add new settings
+                const settings = {
+                    project_name: this.projectName,
+                    text_position: this.textPosition,
+                    text_alignment: this.textAlignment,
+                    credits: this.credits,
+                    credits_position: this.creditsPosition,
+                    background_color: this.backgroundColor,
+                    font_settings: fontSettings
+                };
 
-                // Call processRequest with the image file and font settings
+                // Convert settings to Python dict string
+                const settingsStr = JSON.stringify(settings).replace(/"/g, "'");
+
+                // Call processRequest with the image file and settings
                 const result = await pyodideInstance.runPythonAsync(`
-                    processRequest("${this.selectedFile.name}", font_settings=${fontSettingsStr})
+                    processRequest("${this.selectedFile.name}", settings=${settingsStr})
                 `);
                 
                 this.output = result;
@@ -326,6 +379,8 @@ createApp({
         try {
             // Initialize Pyodide
             await this.initializePyodide();
+            // Initialize background color picker
+            this.initializeBackgroundColorPicker();
         } catch (error) {
             console.error('Failed to initialize app:', error);
         }

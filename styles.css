@@ -12,10 +12,73 @@
     object-fit: contain;
 }
 
-textarea#textEditor.form-control {
-    height: 300px !important;
-    min-height: 300px !important;
+/* Make text editor taller */
+textarea.text-editor-tall {
+    height: 400px !important;
+    min-height: 400px !important;
+    resize: vertical;
+}
+
+/* Style credits input */
+.credits-input {
+    height: 100px !important;
+    min-height: 100px !important;
     resize: none;
+}
+
+/* Background color picker container */
+.bg-color-section {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.bg-color-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Form groups spacing */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Project name input spacing */
+.project-name-container {
+    margin-bottom: 2rem;
+}
+
+/* Text editor controls */
+.text-controls {
+    margin-top: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1.5rem;
+}
+
+.text-controls .form-group:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Credits section */
+.credits-section {
+    margin-top: 1.5rem;
+    background: #fff;
+    border-radius: 4px;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+}
+
+.credits-section .form-select {
+    margin-top: 0.75rem;
 }
 
 .speaker-list {
@@ -67,9 +130,10 @@ textarea#textEditor.form-control {
 
 .form-label {
     margin-bottom: 2px;
-    font-size: 0.75em;
+    font-size: 0.875em;
     white-space: nowrap;
-    color: #666;
+    color: #495057;
+    font-weight: 500;
 }
 
 .form-control, .form-select {
@@ -113,10 +177,6 @@ textarea#textEditor.form-control {
 
 .number-input {
     width: 55px !important;
-}
-
-.font-type-select {
-    width: 80px !important;
 }
 
 .format-controls {
@@ -170,7 +230,7 @@ textarea#textEditor.form-control {
 }
 
 /* Ensure consistent heights for all form controls */
-.form-control:not(#textEditor), .form-select, .btn {
+.form-control:not(.text-editor-tall):not(.credits-input), .form-select, .btn {
     min-height: 34px;
     max-height: 34px;
 }
@@ -194,8 +254,7 @@ textarea#textEditor.form-control {
 
 /* Ensure font select doesn't get squished */
 .control-group:has(.font-type-select) {
-    min-width: 80px;
-    width: 80px;
+    min-width: 120px;
 }
 
 /* Add hover effect for controls with tooltips */
@@ -227,4 +286,14 @@ button {
 
 .pcr-app .pcr-interaction .pcr-cancel {
     background: #dc3545;
+}
+
+/* Generate button spacing */
+.generate-button-container {
+    margin-top: 2rem;
+}
+
+/* Output container */
+.output-container {
+    margin-top: 1rem;
 }
