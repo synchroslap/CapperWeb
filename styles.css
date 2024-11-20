@@ -139,7 +139,6 @@ textarea#textEditor.form-control {
     background-color: #6c757d;
     border-color: #6c757d;
     color: white;
-    width: 70px;
     white-space: nowrap;
     padding: 4px 8px;
 }
@@ -152,6 +151,17 @@ textarea#textEditor.form-control {
 
 .insert-btn-group {
     margin-right: auto;
+    min-width: 140px !important;
+}
+
+.btn-group-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-remove {
+    padding: 4px 8px;
+    width: 34px;
 }
 
 /* Make all inputs use the same box-sizing */
@@ -186,12 +196,6 @@ textarea#textEditor.form-control {
 .control-group:has(.font-type-select) {
     min-width: 80px;
     width: 80px;
-}
-
-/* Ensure insert button group doesn't get squished */
-.control-group:has(.insert-btn) {
-    min-width: 70px;
-    width: 70px;
 }
 
 /* Add hover effect for controls with tooltips */

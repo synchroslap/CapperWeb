@@ -1,4 +1,5 @@
-// main.js
+import CharacterList from './components/CharacterList.js';
+
 let pyodideInstance = null;
 
 async function loadPythonFile(filepath) {
@@ -13,317 +14,179 @@ async function loadPythonFile(filepath) {
     }
 }
 
-async function initializeApp() {
-    const outputDiv = document.getElementById('output');
-    try {
-        outputDiv.textContent = 'Loading Pyodide...';
-        pyodideInstance = await loadPyodide();
-        
-        // Install required packages
-        outputDiv.textContent = 'Installing Python packages...';
-        await pyodideInstance.loadPackage('micropip');
-        await pyodideInstance.runPythonAsync(`
-            import micropip
-            await micropip.install([
-                'colorama',
-                'Pillow',
-                'termcolor',
-                'toml'
-            ])
-        `);
-        
-        // Load Python files from capper directory
-        outputDiv.textContent = 'Loading Python source files...';
-        const pythonFiles = {
-            'text.py': 'capper/text.py',
-            'spec_parse.py': 'capper/spec_parse.py',
-            'pretty_logging.py': 'capper/pretty_logging.py',
-            'caption.py': 'capper/caption.py'
-        };
+const { createApp } = Vue;
 
-        // Create capper directory in virtual filesystem
-        pyodideInstance.FS.mkdir('capper');
+createApp({
+    components: {
+        CharacterList
+    },
 
-        // Load and write each file
-        for (const [filename, filepath] of Object.entries(pythonFiles)) {
+    data() {
+        return {
+            characters: [{
+                name: 'Character 1',
+                fontType: 'Noto Sans',
+                fontHeight: 1,
+                strokeWidth: 0,
+                fontColor: '#000000',
+                strokeColor: '#ffffff'
+            }],
+            textContent: '',
+            output: '',
+            imagePreview: null,
+            selectedFile: null,
+            initialized: false
+        }
+    },
+
+    methods: {
+        async handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.selectedFile = file;
+                
+                // Create image preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.imagePreview = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // Add to Pyodide filesystem if initialized
+                if (this.initialized && pyodideInstance) {
+                    const arrayBuffer = await file.arrayBuffer();
+                    const uint8Array = new Uint8Array(arrayBuffer);
+                    pyodideInstance.FS.writeFile(file.name, uint8Array);
+                }
+            }
+        },
+
+        insertCharacterTag(name) {
+            const tag = `[${name}]`;
+            const textarea = document.querySelector('textarea');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            
+            this.textContent = this.textContent.substring(0, start) + 
+                             tag + 
+                             this.textContent.substring(end);
+            
+            this.$nextTick(() => {
+                textarea.selectionStart = textarea.selectionEnd = start + tag.length;
+                textarea.focus();
+            });
+        },
+
+        async generate() {
             try {
-                const content = await loadPythonFile(filepath);
-                // Write to virtual filesystem with original filename in capper directory
-                pyodideInstance.FS.writeFile(`capper/${filename}`, content);
+                if (!this.initialized) {
+                    throw new Error('Python environment not yet initialized');
+                }
+
+                if (!this.selectedFile) {
+                    throw new Error('Please upload an image first');
+                }
+
+                // Write text content to file
+                pyodideInstance.FS.writeFile('input.txt', this.textContent);
+
+                // Convert characters to font settings
+                const fontSettings = {};
+                this.characters.forEach(char => {
+                    fontSettings[char.name] = {
+                        font_type: char.fontType,
+                        font_height: parseFloat(char.fontHeight),
+                        font_color: char.fontColor,
+                        stroke_width: parseFloat(char.strokeWidth),
+                        stroke_color: char.strokeColor
+                    };
+                });
+
+                // Convert font settings to Python dict string
+                const fontSettingsStr = JSON.stringify(fontSettings).replace(/"/g, "'");
+
+                // Call processRequest with the image file and font settings
+                const result = await pyodideInstance.runPythonAsync(`
+                    processRequest("${this.selectedFile.name}", font_settings=${fontSettingsStr})
+                `);
+                
+                this.output = result;
             } catch (error) {
-                outputDiv.textContent = error.message;
+                this.output = `Error: ${error.message}`;
+                console.error('Processing error:', error);
+            }
+        },
+
+        async initializePyodide() {
+            try {
+                this.output = 'Loading Pyodide...';
+                pyodideInstance = await loadPyodide();
+                
+                this.output = 'Installing Python packages...';
+                await pyodideInstance.loadPackage('micropip');
+                await pyodideInstance.runPythonAsync(`
+                    import micropip
+                    await micropip.install([
+                        'colorama',
+                        'Pillow',
+                        'termcolor',
+                        'toml'
+                    ])
+                `);
+
+                // Load Python files
+                this.output = 'Loading Python source files...';
+                const pythonFiles = {
+                    'text.py': './capper/text.py',
+                    'spec_parse.py': './capper/spec_parse.py',
+                    'pretty_logging.py': './capper/pretty_logging.py',
+                    'caption.py': './capper/caption.py'
+                };
+
+                try {
+                    // Create capper directory in virtual filesystem
+                    pyodideInstance.FS.mkdir('capper');
+                } catch (e) {
+                    // Directory might already exist
+                    console.log('Capper directory already exists');
+                }
+
+                // Load and write each file
+                for (const [filename, filepath] of Object.entries(pythonFiles)) {
+                    try {
+                        const content = await loadPythonFile(filepath);
+                        pyodideInstance.FS.writeFile(`capper/${filename}`, content);
+                    } catch (error) {
+                        console.error(`Failed to load ${filename}:`, error);
+                        this.output = `Failed to load ${filename}: ${error.message}`;
+                        throw error;
+                    }
+                }
+                
+                this.output = 'Initializing Python environment...';
+                await pyodideInstance.runPythonAsync(`
+                    import sys
+                    sys.path.append('capper')
+                    from caption import processRequest
+                `);
+
+                this.initialized = true;
+                this.output = 'Environment ready!';
+            } catch (error) {
+                const errorMsg = `Failed to initialize Python: ${error.message}`;
+                this.output = errorMsg;
+                console.error(errorMsg, error);
                 throw error;
             }
         }
+    },
 
-        // Initialize Python environment with updated path
-        outputDiv.textContent = 'Initializing Python environment...';
-        await pyodideInstance.runPythonAsync(`
-            import sys
-            sys.path.append('capper')
-            from caption import processRequest
-        `);
-
-        outputDiv.textContent = 'Environment ready!';
-        setupEventListeners();
-        return pyodideInstance;
-
-    } catch (error) {
-        const errorMessage = `Error: ${error.message}`;
-        console.error('Failed to initialize Python:', error);
-        outputDiv.textContent = errorMessage;
-        throw error;
-    }
-}
-
-function createCharacterEntry(charNum) {
-    const entry = document.createElement('div');
-    entry.className = 'speaker-entry';
-    entry.innerHTML = `
-        <div class="name-preview-row">
-            <div class="name-input">
-                <input type="text" class="form-control speaker-name" placeholder="Character Name" value="Character ${charNum}">
-            </div>
-            <div class="font-preview">Character ${charNum}</div>
-        </div>
-        <div class="format-controls">
-            <div class="control-group insert-btn-group">
-                <label class="form-label">&nbsp;</label>
-                <button class="btn btn-secondary insert-btn" title="Insert character tag">Insert</button>
-            </div>
-            <div class="control-group">
-                <label class="form-label">Color</label>
-                <div class="color-picker-container" data-type="font"></div>
-            </div>
-            <div class="control-group">
-                <label class="form-label">Font</label>
-                <select class="form-select font-type-select" title="Font Type">
-                    <option value="Noto Sans">Sans</option>
-                    <option value="Noto Serif">Serif</option>
-                    <option value="Noto Emoji">Emoji</option>
-                </select>
-            </div>
-            <div class="control-group">
-                <label class="form-label">Rel. Height</label>
-                <input type="number" class="form-control number-input font-height" value="1" min="0" max="100" step="0.1" title="Font Height">
-            </div>
-            <div class="control-group">
-                <label class="form-label">Stroke</label>
-                <input type="number" class="form-control number-input stroke-width" value="0" min="0" max="10" step="0.1" title="Stroke Width">
-            </div>
-            <div class="control-group">
-                <label class="form-label">Stroke Color</label>
-                <div class="color-picker-container" data-type="stroke"></div>
-            </div>
-        </div>
-    `;
-
-    // Initialize color pickers
-    const fontColorContainer = entry.querySelector('.color-picker-container[data-type="font"]');
-    const strokeColorContainer = entry.querySelector('.color-picker-container[data-type="stroke"]');
-    
-    const fontColorPicker = Pickr.create({
-        el: fontColorContainer,
-        theme: 'nano',
-        default: '#000000',
-        swatches: [
-            '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
-            '#ffff00', '#00ffff', '#ff00ff', '#808080', '#800000'
-        ],
-        components: {
-            preview: true,
-            opacity: true,
-            hue: true,
-            interaction: {
-                hex: true,
-                rgba: true,
-                input: true,
-                save: true
-            }
-        }
-    });
-
-    const strokeColorPicker = Pickr.create({
-        el: strokeColorContainer,
-        theme: 'nano',
-        default: '#ffffff',
-        swatches: [
-            '#000000', '#ffffff', '#ff0000', '#00ff00', '#0000ff',
-            '#ffff00', '#00ffff', '#ff00ff', '#808080', '#800000'
-        ],
-        components: {
-            preview: true,
-            opacity: true,
-            hue: true,
-            interaction: {
-                hex: true,
-                rgba: true,
-                input: true,
-                save: true
-            }
-        }
-    });
-
-    // Store color pickers in the entry element for later access
-    entry.fontColorPicker = fontColorPicker;
-    entry.strokeColorPicker = strokeColorPicker;
-
-    // Add event listeners for formatting changes
-    const preview = entry.querySelector('.font-preview');
-    const updatePreview = () => {
-        const name = entry.querySelector('.speaker-name').value;
-        const fontType = entry.querySelector('.font-type-select').value;
-        const height = entry.querySelector('.font-height').value;
-        const strokeWidth = entry.querySelector('.stroke-width').value;
-
-        preview.style.fontFamily = fontType;
-        preview.style.fontSize = `${height * 16}px`;
-        preview.textContent = name;
-    };
-
-    // Add event listeners to inputs
-    entry.querySelectorAll('input:not([type="color"]), select').forEach(input => {
-        input.addEventListener('input', updatePreview);
-        input.addEventListener('change', updatePreview);
-    });
-
-    // Add color picker event listeners
-    fontColorPicker.on('save', (color) => {
-        if (color) {
-            preview.style.color = color.toRGBA().toString();
-        }
-        fontColorPicker.hide();
-    });
-
-    strokeColorPicker.on('save', (color) => {
-        if (color) {
-            preview.style.webkitTextStroke = `${entry.querySelector('.stroke-width').value}px ${color.toRGBA().toString()}`;
-        }
-        strokeColorPicker.hide();
-    });
-
-    // Add event listener for stroke width changes
-    entry.querySelector('.stroke-width').addEventListener('input', () => {
-        const strokeWidth = entry.querySelector('.stroke-width').value;
-        const strokeColor = strokeColorPicker.getColor()?.toRGBA().toString() || '#ffffff';
-        preview.style.webkitTextStroke = `${strokeWidth}px ${strokeColor}`;
-    });
-
-    // Add event listener for insert button
-    entry.querySelector('.insert-btn').addEventListener('click', () => {
-        const textEditor = document.getElementById('textEditor');
-        const name = entry.querySelector('.speaker-name').value;
-        const tag = `[${name}]`;
-        
-        // Get cursor position
-        const start = textEditor.selectionStart;
-        const end = textEditor.selectionEnd;
-        
-        // Insert tag at cursor position
-        textEditor.value = textEditor.value.substring(0, start) + 
-                          tag + 
-                          textEditor.value.substring(end);
-        
-        // Move cursor after inserted tag
-        textEditor.selectionStart = textEditor.selectionEnd = start + tag.length;
-        textEditor.focus();
-    });
-
-    updatePreview();
-    return entry;
-}
-
-function setupEventListeners() {
-    const imageUpload = document.getElementById('imageUpload');
-    const generateBtn = document.getElementById('generateBtn');
-    const imagePreview = document.getElementById('imagePreview');
-    const speakerList = document.getElementById('speakerList');
-    const addSpeakerBtn = document.getElementById('addSpeaker');
-
-    // Initialize character list
-    speakerList.innerHTML = '';
-    speakerList.appendChild(createCharacterEntry(1));
-
-    // Add character button
-    let charCount = 1;
-    addSpeakerBtn.addEventListener('click', () => {
-        charCount++;
-        speakerList.appendChild(createCharacterEntry(charCount));
-        speakerList.scrollTop = speakerList.scrollHeight;
-    });
-
-    imageUpload.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            // Display preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-            };
-            reader.readAsDataURL(file);
-
-            // Add to Pyodide filesystem
-            const arrayBuffer = await file.arrayBuffer();
-            const uint8Array = new Uint8Array(arrayBuffer);
-            pyodideInstance.FS.writeFile(file.name, uint8Array);
-        }
-    });
-
-    generateBtn.addEventListener('click', async () => {
-        const outputDiv = document.getElementById('output');
-        const textEditor = document.getElementById('textEditor');
-        const imageUpload = document.getElementById('imageUpload');
-
+    async mounted() {
         try {
-            if (!imageUpload.files[0]) {
-                throw new Error('Please upload an image first');
-            }
-
-            // Collect font settings from all character entries
-            const fontSettings = {};
-            document.querySelectorAll('.speaker-entry').forEach(entry => {
-                const name = entry.querySelector('.speaker-name').value;
-                const fontType = entry.querySelector('.font-type-select').value;
-                const fontHeight = entry.querySelector('.font-height').value;
-                const strokeWidth = entry.querySelector('.stroke-width').value;
-                const fontColor = entry.fontColorPicker.getColor()?.toRGBA().toString() || '#000000';
-                const strokeColor = entry.strokeColorPicker.getColor()?.toRGBA().toString() || '#ffffff';
-
-                fontSettings[name] = {
-                    font_type: fontType,
-                    font_height: parseFloat(fontHeight),
-                    font_color: fontColor,
-                    stroke_width: parseFloat(strokeWidth),
-                    stroke_color: strokeColor
-                };
-            });
-
-            // Write text content to file
-            const textContent = textEditor.value;
-            pyodideInstance.FS.writeFile('input.txt', textContent);
-
-            // Convert font settings to Python dict string
-            const fontSettingsStr = JSON.stringify(fontSettings).replace(/"/g, "'");
-
-            // Call processRequest with the image file and font settings
-            const result = await pyodideInstance.runPythonAsync(`
-                processRequest("${imageUpload.files[0].name}", font_settings=${fontSettingsStr})
-            `);
-            
-            outputDiv.textContent = result;
+            // Initialize Pyodide
+            await this.initializePyodide();
         } catch (error) {
-            outputDiv.textContent = `Error: ${error.message}`;
-            console.error('Processing error:', error);
+            console.error('Failed to initialize app:', error);
         }
-    });
-}
-
-// Initialize when page loads
-window.addEventListener('load', async () => {
-    try {
-        await initializeApp();
-        console.log('Python environment initialized successfully');
-    } catch (error) {
-        console.error('Failed to initialize app:', error);
     }
-});
+}).mount('#app');
