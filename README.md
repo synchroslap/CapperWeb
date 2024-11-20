@@ -10,7 +10,7 @@ Minimum information to generate caption is Project Name, Image Upload, and Text.
 "Characters" are your custom font styles. To use a character, type its name in square brackets followed by the text 
 you want to use that style on. You can click the Insert button on the character to quickly insert this tag. 
 
-See the [README of my previous project](https://github.com/synchroslap/CapperGUI) or the 
+See the [README of my previous project](https://github.com/synchroslap/CapperGUI?tab=readme-ov-file#characters) or the 
 [original Capper project sample text](https://github.com/substantialpickle/Capper/blob/main/samples/getting-started/text.txt) 
 to get a better idea of how this works.
 
