@@ -116,7 +116,7 @@ const CharacterList = {
             const newCharNum = this.characters.length + 1;
             const defaultFont = this.availableFonts.length > 0 ? this.availableFonts[0].path : '';
             const newCharacter = {
-                name: `Character ${newCharNum}`,
+                name: `Character${newCharNum}`,
                 fontType: defaultFont,
                 fontHeight: 1,
                 strokeWidth: 0,

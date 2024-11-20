@@ -37,7 +37,7 @@ createApp({
         return {
             projectName: '',
             characters: [{
-                name: 'Character 1',
+                name: 'Character1',
                 fontType: '/fonts/Noto_Sans/NotoSans-Regular.ttf',
                 fontHeight: 1,
                 strokeWidth: 0,
@@ -48,14 +48,16 @@ createApp({
             textPosition: 'left',
             textAlignment: 'left',
             credits: '',
-            creditsPosition: 'bottom-right',
-            backgroundColor: '#ffffff',
+            creditsPosition: 'br',
+            backgroundColor: '#aaaaaa',
             output: '',
+            imageName: '',
             imagePreview: null,
             selectedFile: null,
             initialized: false,
             availableFonts: [],
-            bgColorPicker: null
+            bgColorPicker: null,
+            generatedImage: null
         }
     },
 
@@ -64,6 +66,8 @@ createApp({
             const file = event.target.files[0];
             if (file) {
                 this.selectedFile = file;
+
+                this.imageName = file.name
                 
                 // Create image preview
                 const reader = new FileReader();
@@ -220,6 +224,17 @@ createApp({
             });
         },
 
+        downloadGeneratedImage() {
+            if (this.generatedImage) {
+                const link = document.createElement('a');
+                link.href = this.generatedImage;
+                link.download = `${this.projectName}_cap.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        },
+
         async generate() {
             try {
                 if (!this.initialized) {
@@ -230,41 +245,72 @@ createApp({
                     throw new Error('Please upload an image first');
                 }
 
+                if (!this.projectName) {
+                    throw new Error('Please set the project name')
+                }
+
                 // Write text content to file
-                pyodideInstance.FS.writeFile('input.txt', this.textContent);
+                pyodideInstance.FS.writeFile('text.txt', this.textContent);
 
                 // Convert characters to font settings
-                const fontSettings = {};
+                const fontSettings = [];
                 this.characters.forEach(char => {
-                    fontSettings[char.name] = {
-                        font_type: char.fontType,
-                        font_height: parseFloat(char.fontHeight),
-                        font_color: char.fontColor,
-                        stroke_width: parseFloat(char.strokeWidth),
+                    fontSettings.push({
+                        name: char.name,
+                        color: char.fontColor,
+                        font: char.fontType,
+                        relative_height: char.fontHeight,
+                        stroke_width: char.strokeWidth,
                         stroke_color: char.strokeColor
-                    };
+                    });
                 });
 
                 // Add new settings
                 const settings = {
-                    project_name: this.projectName,
-                    text_position: this.textPosition,
-                    text_alignment: this.textAlignment,
-                    credits: this.credits,
-                    credits_position: this.creditsPosition,
-                    background_color: this.backgroundColor,
-                    font_settings: fontSettings
+                    image: {
+                        art: this.imageName,
+                        bg_color: this.backgroundColor
+                    },
+                    text: {
+                        text: 'text.txt',
+                        text_box_pos: this.textPosition,
+                        alignment: this.textAlignment,
+                        credits_pos: this.creditsPosition,
+                        credits: this.credits.split('\n')
+                    },
+                    output: {
+                        base_filename: this.projectName,
+                        output_directory: './',
+                        outputs: ['caption']
+                    },
+                    characters: fontSettings
                 };
 
-                // Convert settings to Python dict string
-                const settingsStr = JSON.stringify(settings).replace(/"/g, "'");
+                console.log(settings)
 
-                // Call processRequest with the image file and settings
+                // Convert settings to Python dict string and properly escape it
+                const settingsStr = JSON.stringify(settings).replace(/"/g, "'");
                 const result = await pyodideInstance.runPythonAsync(`
-                    processRequest("${this.selectedFile.name}", settings=${settingsStr})
+                    processRequest("${settingsStr}")
                 `);
                 
                 this.output = result;
+
+                // After successful generation, read and display the generated image
+                if (result.includes('Successfully generated')) {
+                    const generatedFileName = `${this.projectName}_cap.png`;
+                    try {
+                        const imageData = pyodideInstance.FS.readFile(generatedFileName);
+                        const blob = new Blob([imageData], { type: 'image/png' });
+                        this.generatedImage = URL.createObjectURL(blob);
+                        this.output = `<div class="generated-output">
+                            <img src="${this.generatedImage}" alt="Generated Caption" style="max-width: 100%; margin-bottom: 10px;">
+                            <button onclick="app.downloadGeneratedImage()" class="download-btn">Download Image</button>
+                        </div>`;
+                    } catch (error) {
+                        console.error('Error reading generated image:', error);
+                    }
+                }
             } catch (error) {
                 this.output = `Error: ${error.message}`;
                 console.error('Processing error:', error);

@@ -32,11 +32,15 @@ class UserSpec:
                 # later stage in the program after the text has been parsed.
                 internalColl[defaultKey]["value"] = None
 
-    def __init__(self, fileName):
-        Logging.header(f"Verifying specification file '{fileName}'")
-        UserError.uassert( Path(fileName).is_file(), f"File '{fileName}' does not exist" )
-        with open(fileName, "r", encoding="utf-8") as f:
-            spec = toml.load(f)
+    # modified so it can also take a dictionary directly as input if isFile = False
+    def __init__(self, specsInput, isFile = True):
+        if isFile:
+            Logging.header(f"Verifying specification file '{specsInput}'")
+            UserError.uassert( Path(specsInput).is_file(), f"File '{specsInput}' does not exist" )
+            with open(specsInput, "r", encoding="utf-8") as f:
+                spec = toml.load(f)
+        else:
+            spec = specsInput
 
         Logging.subSection("Checking top level headers...")
         topLevelKeys = ["image", "text", "output", "characters"]

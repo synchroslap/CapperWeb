@@ -5,6 +5,7 @@ from math import ceil
 import os
 import subprocess
 import sys
+import json
 from PIL import Image, ImageDraw, ImageFont
 
 from pretty_logging import Logging, UserError
@@ -359,12 +360,15 @@ def main():
     generateOutputs(textBoxes, art)
 
 # main method for running overall capper program and processing request from web end
-def processRequest(imageName: str, ):
+def processRequest(specsDictStr: str):
     colorama.init()
     START_TIME = time.time()
     try:
+        specsDictStr = specsDictStr.replace("\'", "\"")
+        print(specsDictStr)
+        specsDict = json.loads(specsDictStr)
         global SPEC
-        SPEC = UserSpec(TOML_DIR)
+        SPEC = UserSpec(specsDict, False)
         global FONTS
         FONTS = loadFonts(SPEC.characters, SPEC.text["base_font_height"]["value"])
         main()
@@ -379,4 +383,4 @@ def createTOML():
     return
 
 if __name__ == '__main__':
-    processRequest("samples/getting-started/spec.toml")
+    processRequest("{'image':{'art':'20170617_221242.jpg','bg_color':'#aaaaaa'},'text':{'text':'text.txt','text_box_pos':'left','alignment':'left','credits_pos':'bottom-right','credits':['']},'output':{'base_filename':'asa','output_directory':'./','outputs':['caption']},'characters':[{'name':'Character 1','color':'#000000','font_type':'/fonts/Noto_Sans/NotoSans-Regular.ttf','font_height':1,'stroke_width':0,'stroke_color':'#ffffff'}]}")
