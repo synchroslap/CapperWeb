@@ -374,6 +374,7 @@ def processRequest(specsDictStr: str):
         main()
         Logging.header(f"Program finished in {time.time()-START_TIME:.2f} seconds")
         Logging.divider()
+        return "Success"
     except UserError as e:
         Logging.divider()
         print(f"\nUserError: {e.message}")

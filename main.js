@@ -294,18 +294,16 @@ createApp({
                     processRequest("${settingsStr}")
                 `);
                 
-                this.output = result;
-
+                console.log('---- Result: ' + result)
                 // After successful generation, read and display the generated image
-                if (result.includes('Successfully generated')) {
+                if (result.includes('Success')) {
                     const generatedFileName = `${this.projectName}_cap.png`;
                     try {
                         const imageData = pyodideInstance.FS.readFile(generatedFileName);
                         const blob = new Blob([imageData], { type: 'image/png' });
                         this.generatedImage = URL.createObjectURL(blob);
                         this.output = `<div class="generated-output">
-                            <img src="${this.generatedImage}" alt="Generated Caption" style="max-width: 100%; margin-bottom: 10px;">
-                            <button onclick="app.downloadGeneratedImage()" class="download-btn">Download Image</button>
+                            <img src="${this.generatedImage}" alt="Generated Caption" class="col-8 align-self-center">
                         </div>`;
                     } catch (error) {
                         console.error('Error reading generated image:', error);

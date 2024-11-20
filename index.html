@@ -114,7 +114,7 @@
                 <button @click="generate" class="btn btn-success">Generate</button>
             </div>
             <div class="col-12 output-container">
-                <div class="bg-light p-3 rounded">{{ output }}</div>
+                <div class="bg-light p-3 rounded row" v-html="output"></div>
             </div>
         </div>
     </div>
