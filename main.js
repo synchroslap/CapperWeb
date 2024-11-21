@@ -62,6 +62,134 @@ createApp({
     },
 
     methods: {
+        async exportProject() {
+            try {
+                if (!this.selectedFile || !this.projectName) {
+                    throw new Error('Please ensure you have an image uploaded and project name set');
+                }
+
+                const zip = new JSZip();
+
+                // Add image file
+                zip.file(`image/${this.imageName}`, this.selectedFile);
+
+                // Add text content
+                zip.file('text.txt', this.textContent);
+
+                // Add settings
+                const settings = {
+                    projectName: this.projectName,
+                    image: {
+                        art: this.imageName,
+                        bg_color: this.backgroundColor
+                    },
+                    text: {
+                        text_box_pos: this.textPosition,
+                        alignment: this.textAlignment,
+                        credits_pos: this.creditsPosition,
+                        credits: this.credits.split('\n')
+                    },
+                    characters: this.characters
+                };
+                zip.file('settings.json', JSON.stringify(settings, null, 2));
+
+                // Add custom fonts
+                const customFonts = this.availableFonts.filter(font => 
+                    font.path.startsWith('/fonts/custom/')
+                );
+                if (customFonts.length > 0) {
+                    const fontsFolder = zip.folder('fonts');
+                    for (const font of customFonts) {
+                        try {
+                            const fontData = pyodideInstance.FS.readFile(font.path);
+                            const fontName = font.path.split('/').pop();
+                            fontsFolder.file(fontName, fontData);
+                        } catch (error) {
+                            console.error(`Failed to add font ${font.path}:`, error);
+                        }
+                    }
+                }
+
+                // Generate and download zip
+                const blob = await zip.generateAsync({type: 'blob'});
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${this.projectName}_project.zip`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                this.output = 'Project exported successfully!';
+            } catch (error) {
+                this.output = `Export error: ${error.message}`;
+                console.error('Export error:', error);
+            }
+        },
+
+        async importProject(event) {
+            try {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(file);
+                
+                // Load settings
+                const settingsJson = await contents.file('settings.json').async('string');
+                const settings = JSON.parse(settingsJson);
+                
+                // Restore project name
+                this.projectName = settings.projectName;
+                
+                // Restore image
+                const imageFile = Object.values(contents.files).find(f => 
+                    f.name.startsWith('image/')
+                );
+                if (imageFile) {
+                    const imageBlob = await imageFile.async('blob');
+                    const imageFile2 = new File([imageBlob], imageFile.name.split('/').pop(), {
+                        type: imageBlob.type
+                    });
+                    await this.handleImageUpload({ target: { files: [imageFile2] }});
+                }
+                
+                // Restore text content
+                this.textContent = await contents.file('text.txt').async('string');
+                
+                // Restore text settings
+                this.textPosition = settings.text.text_box_pos;
+                this.textAlignment = settings.text.alignment;
+                this.creditsPosition = settings.text.credits_pos;
+                this.credits = settings.text.credits.join('\n');
+                
+                // Restore background color
+                this.backgroundColor = settings.image.bg_color;
+                this.bgColorPicker.setColor(settings.image.bg_color);
+                
+                // Import custom fonts
+                const fontsFolder = contents.folder('fonts');
+                if (fontsFolder) {
+                    for (const fontPath of Object.keys(fontsFolder.files)) {
+                        if (fontPath.endsWith('/')) continue;
+                        
+                        const fontData = await fontsFolder.file(fontPath).async('arraybuffer');
+                        const fontFile = new File([fontData], fontPath.split('/').pop(), {
+                            type: 'font/ttf'
+                        });
+                        await this.handleFontUpload(fontFile);
+                    }
+                }
+                
+                // Restore characters
+                this.characters = settings.characters;
+                
+                this.output = 'Project imported successfully!';
+            } catch (error) {
+                this.output = `Import error: ${error.message}`;
+                console.error('Import error:', error);
+            }
+        },
+        
         async handleImageUpload(event) {
             const file = event.target.files[0];
             if (file) {
