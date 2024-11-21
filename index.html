@@ -124,7 +124,10 @@
             </div>
 
             <div class="col-12 generate-button-container">
-                <button @click="generate" class="btn btn-success">Generate</button>
+                <button @click="generate" class="btn btn-success generate-btn" :disabled="isGenerating">
+                    <span v-if="isGenerating" class="spinner"></span>
+                    Generate
+                </button>
             </div>
             <div class="col-12 output-container">
                 <div class="bg-light p-3 rounded row" v-html="output"></div>

@@ -57,7 +57,8 @@ createApp({
             initialized: false,
             availableFonts: [],
             bgColorPicker: null,
-            generatedImage: null
+            generatedImage: null,
+            isGenerating: false
         }
     },
 
@@ -165,118 +166,118 @@ createApp({
             }
         },
 
-async importProject(event) {
-    try {
-        const file = event.target.files[0];
-        if (!file) return;
+        async importProject(event) {
+            try {
+                const file = event.target.files[0];
+                if (!file) return;
 
-        const zip = new JSZip();
-        const contents = await zip.loadAsync(file);
-        
-        // Load settings
-        const settingsFile = contents.file('settings.json');
-        if (!settingsFile) {
-            throw new Error('Invalid project file: settings.json not found');
-        }
-        const settingsJson = await settingsFile.async('string');
-        const settings = JSON.parse(settingsJson);
-        
-        // Restore project name
-        this.projectName = settings.projectName;
-        
-        // Find the actual image file (not the directory)
-        const imageFile = Object.values(contents.files).find(f => 
-            f.name.startsWith('image/') && !f.dir && f.name !== 'image/'
-        );
-        
-        if (imageFile) {
-            const imageBlob = await imageFile.async('blob');
-            const fileName = imageFile.name.split('/').pop();
-            
-            if (!fileName) {
-                throw new Error('Invalid image file name in project');
-            }
-            
-            // Create a proper File object with the correct type
-            const file = new File([imageBlob], fileName, {
-                type: imageBlob.type || this.getImageMimeType(fileName)
-            });
-            
-            // Set the file directly
-            this.selectedFile = file;
-            this.imageName = fileName;
-            
-            // Create image preview
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                this.imagePreview = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(file);
+                
+                // Load settings
+                const settingsFile = contents.file('settings.json');
+                if (!settingsFile) {
+                    throw new Error('Invalid project file: settings.json not found');
+                }
+                const settingsJson = await settingsFile.async('string');
+                const settings = JSON.parse(settingsJson);
+                
+                // Restore project name
+                this.projectName = settings.projectName;
+                
+                // Find the actual image file (not the directory)
+                const imageFile = Object.values(contents.files).find(f => 
+                    f.name.startsWith('image/') && !f.dir && f.name !== 'image/'
+                );
+                
+                if (imageFile) {
+                    const imageBlob = await imageFile.async('blob');
+                    const fileName = imageFile.name.split('/').pop();
+                    
+                    if (!fileName) {
+                        throw new Error('Invalid image file name in project');
+                    }
+                    
+                    // Create a proper File object with the correct type
+                    const file = new File([imageBlob], fileName, {
+                        type: imageBlob.type || this.getImageMimeType(fileName)
+                    });
+                    
+                    // Set the file directly
+                    this.selectedFile = file;
+                    this.imageName = fileName;
+                    
+                    // Create image preview
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.imagePreview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
 
-            // Add to Pyodide filesystem if initialized
-            if (this.initialized && pyodideInstance) {
-                const arrayBuffer = await file.arrayBuffer();
-                const uint8Array = new Uint8Array(arrayBuffer);
-                pyodideInstance.FS.writeFile(fileName, uint8Array);
-            }
-        } else {
-            throw new Error('No image file found in project');
-        }
-        
-        // Restore text content
-        const textFile = contents.file('text.txt');
-        if (textFile) {
-            this.textContent = await textFile.async('string');
-        }
-        
-        // Restore text settings
-        this.textPosition = settings.text.text_box_pos;
-        this.textAlignment = settings.text.alignment;
-        this.creditsPosition = settings.text.credits_pos;
-        this.credits = settings.text.credits.join('\n');
-        
-        // Restore background color
-        this.backgroundColor = settings.image.bg_color;
-        this.bgColorPicker.setColor(settings.image.bg_color);
+                    // Add to Pyodide filesystem if initialized
+                    if (this.initialized && pyodideInstance) {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const uint8Array = new Uint8Array(arrayBuffer);
+                        pyodideInstance.FS.writeFile(fileName, uint8Array);
+                    }
+                } else {
+                    throw new Error('No image file found in project');
+                }
+                
+                // Restore text content
+                const textFile = contents.file('text.txt');
+                if (textFile) {
+                    this.textContent = await textFile.async('string');
+                }
+                
+                // Restore text settings
+                this.textPosition = settings.text.text_box_pos;
+                this.textAlignment = settings.text.alignment;
+                this.creditsPosition = settings.text.credits_pos;
+                this.credits = settings.text.credits.join('\n');
+                
+                // Restore background color
+                this.backgroundColor = settings.image.bg_color;
+                this.bgColorPicker.setColor(settings.image.bg_color);
         
         // Debug logging for fonts
         console.log('All zip contents:', Object.keys(contents.files));
-        
-        // Import custom fonts
-        const fontFiles = Object.keys(contents.files).filter(path => 
-            path.startsWith('fonts/') && !path.endsWith('/') && path !== 'fonts/'
-        );
+                
+                // Import custom fonts
+                const fontFiles = Object.keys(contents.files).filter(path => 
+                    path.startsWith('fonts/') && !path.endsWith('/') && path !== 'fonts/'
+                );
         
         console.log('Found font files:', fontFiles);
-        
-        if (fontFiles.length > 0) {
-            for (const fontPath of fontFiles) {
-                const fontFile = contents.file(fontPath);
+                
+                if (fontFiles.length > 0) {
+                    for (const fontPath of fontFiles) {
+                        const fontFile = contents.file(fontPath);
                 console.log('Processing font file:', fontPath, 'exists:', !!fontFile);
                 
-                if (fontFile) {
-                    try {
-                        const fontData = await fontFile.async('arraybuffer');
-                        const fileName = fontPath.split('/').pop();
-                        const fontFileObj = new File([fontData], fileName, {
-                            type: 'font/ttf'
-                        });
-                        await this.handleFontUpload(fontFileObj);
-                    } catch (error) {
-                        console.error(`Error processing font ${fontPath}:`, error);
+                        if (fontFile) {
+                            try {
+                                const fontData = await fontFile.async('arraybuffer');
+                                const fileName = fontPath.split('/').pop();
+                                const fontFileObj = new File([fontData], fileName, {
+                                    type: 'font/ttf'
+                                });
+                                await this.handleFontUpload(fontFileObj);
+                            } catch (error) {
+                                console.error(`Error processing font ${fontPath}:`, error);
+                            }
+                        }
                     }
                 }
+                
+                // Restore characters
+                this.characters = settings.characters;
+                
+                this.output = 'Project imported successfully!';
+            } catch (error) {
+                this.output = `Import error: ${error.message}`;
+                console.error('Import error:', error);
             }
-        }
-        
-        // Restore characters
-        this.characters = settings.characters;
-        
-        this.output = 'Project imported successfully!';
-    } catch (error) {
-        this.output = `Import error: ${error.message}`;
-        console.error('Import error:', error);
-    }
         },
 
         getImageMimeType(filename) {
@@ -294,11 +295,10 @@ async importProject(event) {
 
         async handleImageUpload(event) {
             const file = event.target.files[0];
-            console.log(file)
+
             if (file) {
                 this.selectedFile = file;
-
-                this.imageName = file.name
+                this.imageName = file.name;
                 
                 // Create image preview
                 const reader = new FileReader();
@@ -468,6 +468,8 @@ async importProject(event) {
 
         async generate() {
             try {
+                this.isGenerating = true;
+
                 if (!this.initialized) {
                     throw new Error('Python environment not yet initialized');
                 }
@@ -525,7 +527,6 @@ async importProject(event) {
                     processRequest("${settingsStr}")
                 `);
                 
-                console.log('---- Result: ' + result)
                 // After successful generation, read and display the generated image
                 if (result.includes('Success')) {
                     const generatedFileName = `${this.projectName}_cap.png`;
@@ -538,11 +539,16 @@ async importProject(event) {
                         </div>`;
                     } catch (error) {
                         console.error('Error reading generated image:', error);
+                        throw error;
                     }
+                } else {
+                    throw new Error(result);
                 }
             } catch (error) {
                 this.output = `Error: ${error.message}`;
                 console.error('Processing error:', error);
+            } finally {
+                this.isGenerating = false;
             }
         },
 
