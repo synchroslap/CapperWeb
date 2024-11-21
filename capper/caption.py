@@ -360,7 +360,7 @@ def main():
     generateOutputs(textBoxes, art)
 
 # main method for running overall capper program and processing request from web end
-def processRequest(specsDictStr: str):
+def processRequest(specsDictStr: str, exportTOML = False):
     colorama.init()
     START_TIME = time.time()
     try:
@@ -371,6 +371,8 @@ def processRequest(specsDictStr: str):
         SPEC = UserSpec(specsDict, False)
         global FONTS
         FONTS = loadFonts(SPEC.characters, SPEC.text["base_font_height"]["value"])
+        global EXPORT_AUTOTOML
+        EXPORT_AUTOTOML = exportTOML
         main()
         Logging.header(f"Program finished in {time.time()-START_TIME:.2f} seconds")
         Logging.divider()
