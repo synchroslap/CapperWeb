@@ -19,6 +19,8 @@ tab may freeze up on larger images, but it should eventually successfully comple
 entire Python runtime into a browser). Your completed caption should display at the bottom of the screen. Right click
 and save image to download your caption.
 
+Note that credits will use the the text settings of whatever your first character is.
+
 ## Roadmap
 - Fix styling and formatting of web UI
 - Spoonfeed guide 
