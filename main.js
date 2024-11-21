@@ -46,7 +46,7 @@ createApp({
             }],
             textContent: '',
             textPosition: 'left',
-            textAlignment: 'left',
+            textAlignment: 'center',
             credits: '',
             creditsPosition: 'br',
             backgroundColor: '#aaaaaa',
