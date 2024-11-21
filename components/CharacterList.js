@@ -17,7 +17,9 @@ const CharacterList = {
                    title="Upload TTF Font">
         </div>
         <div class="speaker-list">
-            <div v-for="(character, index) in characters" :key="index" class="speaker-entry">
+            <div v-for="(character, index) in characters" 
+                 :key="character.id || index" 
+                 class="speaker-entry">
                 <div class="name-preview-row">
                     <div class="name-input">
                         <input type="text" class="form-control speaker-name" 
@@ -45,7 +47,9 @@ const CharacterList = {
                     </div>
                     <div class="control-group">
                         <label class="form-label">Color</label>
-                        <div :id="'fontColor' + index" class="color-picker-container"></div>
+                        <div class="color-picker-wrapper">
+                            <div :class="'font-color-picker-' + getSafeId(character)"></div>
+                        </div>
                     </div>
                     <div class="control-group">
                         <label class="form-label">Font</label>
@@ -76,7 +80,9 @@ const CharacterList = {
                     </div>
                     <div class="control-group">
                         <label class="form-label">Stroke Color</label>
-                        <div :id="'strokeColor' + index" class="color-picker-container"></div>
+                        <div class="color-picker-wrapper">
+                            <div :class="'stroke-color-picker-' + getSafeId(character)"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -100,11 +106,17 @@ const CharacterList = {
 
     data() {
         return {
-            colorPickers: []
+            colorPickers: {},
+            initializationTimeout: null
         }
     },
 
     methods: {
+        getSafeId(character) {
+            // Convert any ID to a CSS-safe class name by removing invalid characters
+            return `id${String(character.id || '').replace(/[^a-zA-Z0-9]/g, '')}`;
+        },
+
         handleFontUpload(event) {
             const file = event.target.files[0];
             if (file && file.name.toLowerCase().endsWith('.ttf')) {
@@ -116,6 +128,7 @@ const CharacterList = {
             const newCharNum = this.characters.length + 1;
             const defaultFont = this.availableFonts.length > 0 ? this.availableFonts[0].path : '';
             const newCharacter = {
+                id: Math.floor(Date.now()), // Use integer timestamp
                 name: `Character${newCharNum}`,
                 fontType: defaultFont,
                 fontHeight: 1,
@@ -125,37 +138,15 @@ const CharacterList = {
             };
             
             this.$emit('update:characters', [...this.characters, newCharacter]);
-            
-            this.$nextTick(() => {
-                this.initializeColorPickers(this.characters.length - 1);
-            });
         },
 
         removeCharacter(index) {
             if (confirm(`Are you sure you want to remove "${this.characters[index].name}"?`)) {
-                // Clean up color pickers for the removed character
-                if (this.colorPickers[index]) {
-                    if (this.colorPickers[index].font) {
-                        this.colorPickers[index].font.destroyAndRemove();
-                    }
-                    if (this.colorPickers[index].stroke) {
-                        this.colorPickers[index].stroke.destroyAndRemove();
-                    }
-                }
-
-                // Remove the character and its color pickers
+                const character = this.characters[index];
+                this.cleanupColorPicker(character.id);
                 const updatedCharacters = [...this.characters];
                 updatedCharacters.splice(index, 1);
-                this.colorPickers.splice(index, 1);
-                
                 this.$emit('update:characters', updatedCharacters);
-
-                // Reinitialize remaining color pickers with updated indices
-                this.$nextTick(() => {
-                    updatedCharacters.forEach((_, i) => {
-                        this.initializeColorPickers(i);
-                    });
-                });
             }
         },
 
@@ -173,7 +164,46 @@ const CharacterList = {
             this.$emit('update:characters', [...this.characters]);
         },
 
-        initializeColorPickers(index) {
+        cleanupColorPicker(characterId) {
+            if (this.colorPickers[characterId]) {
+                if (this.colorPickers[characterId].font) {
+                    this.colorPickers[characterId].font.destroyAndRemove();
+                }
+                if (this.colorPickers[characterId].stroke) {
+                    this.colorPickers[characterId].stroke.destroyAndRemove();
+                }
+                delete this.colorPickers[characterId];
+            }
+        },
+
+        cleanupAllColorPickers() {
+            Object.keys(this.colorPickers).forEach(characterId => {
+                this.cleanupColorPicker(characterId);
+            });
+        },
+
+        ensureCharacterIds() {
+            let updated = false;
+            this.characters.forEach(character => {
+                if (!character.id) {
+                    character.id = Math.floor(Date.now() + Math.random() * 1000);
+                    updated = true;
+                }
+            });
+            if (updated) {
+                this.updateCharacters();
+            }
+        },
+
+        initializeColorPicker(character) {
+            const safeId = this.getSafeId(character);
+            const fontColorEl = document.querySelector(`.font-color-picker-${safeId}`);
+            const strokeColorEl = document.querySelector(`.stroke-color-picker-${safeId}`);
+            
+            if (!fontColorEl || !strokeColorEl) {
+                return false;
+            }
+
             const pickrConfig = {
                 theme: 'nano',
                 swatches: [
@@ -193,58 +223,88 @@ const CharacterList = {
                 }
             };
 
-            // Initialize font color picker
-            const fontColorPicker = Pickr.create({
-                ...pickrConfig,
-                el: `#fontColor${index}`,
-                default: this.characters[index].fontColor
-            });
+            try {
+                // Clean up existing pickers if they exist
+                this.cleanupColorPicker(character.id);
 
-            // Initialize stroke color picker
-            const strokeColorPicker = Pickr.create({
-                ...pickrConfig,
-                el: `#strokeColor${index}`,
-                default: this.characters[index].strokeColor
-            });
+                const fontColorPicker = Pickr.create({
+                    ...pickrConfig,
+                    el: fontColorEl,
+                    default: character.fontColor
+                });
 
-            fontColorPicker.on('save', (color) => {
-                if (color) {
-                    this.characters[index].fontColor = color.toHEXA().toString();
-                    this.updateCharacters();
-                }
-                fontColorPicker.hide();
-            });
+                const strokeColorPicker = Pickr.create({
+                    ...pickrConfig,
+                    el: strokeColorEl,
+                    default: character.strokeColor
+                });
 
-            strokeColorPicker.on('save', (color) => {
-                if (color) {
-                    this.characters[index].strokeColor = color.toHEXA().toString();
-                    this.updateCharacters();
-                }
-                strokeColorPicker.hide();
-            });
+                fontColorPicker.on('save', (color) => {
+                    if (color) {
+                        character.fontColor = color.toHEXA().toString();
+                        this.updateCharacters();
+                    }
+                    fontColorPicker.hide();
+                });
 
-            // Store pickers for cleanup
-            if (!this.colorPickers[index]) {
-                this.colorPickers[index] = {};
+                strokeColorPicker.on('save', (color) => {
+                    if (color) {
+                        character.strokeColor = color.toHEXA().toString();
+                        this.updateCharacters();
+                    }
+                    strokeColorPicker.hide();
+                });
+
+                this.colorPickers[character.id] = {
+                    font: fontColorPicker,
+                    stroke: strokeColorPicker
+                };
+
+                return true;
+            } catch (error) {
+                console.error(`Error initializing color pickers for character ${character.id}:`, error);
+                return false;
             }
-            this.colorPickers[index].font = fontColorPicker;
-            this.colorPickers[index].stroke = strokeColorPicker;
+        },
+
+        initializeAllColorPickers() {
+            // Ensure all characters have IDs first
+            this.ensureCharacterIds();
+
+            // Clear any existing timeout
+            if (this.initializationTimeout) {
+                clearTimeout(this.initializationTimeout);
+            }
+
+            // Wait for Vue to finish rendering
+            this.initializationTimeout = setTimeout(() => {
+                this.$nextTick(() => {
+                    this.characters.forEach(character => {
+                        this.initializeColorPicker(character);
+                    });
+                });
+            }, 250);
+        }
+    },
+
+    watch: {
+        characters: {
+            handler() {
+                this.initializeAllColorPickers();
+            },
+            deep: true
         }
     },
 
     mounted() {
-        // Initialize color pickers for existing characters
-        this.characters.forEach((_, index) => {
-            this.initializeColorPickers(index);
-        });
+        this.initializeAllColorPickers();
     },
 
     beforeUnmount() {
-        // Cleanup color pickers
-        this.colorPickers.forEach(pickers => {
-            if (pickers.font) pickers.font.destroyAndRemove();
-            if (pickers.stroke) pickers.stroke.destroyAndRemove();
-        });
+        if (this.initializationTimeout) {
+            clearTimeout(this.initializationTimeout);
+        }
+        this.cleanupAllColorPickers();
     }
 };
 
