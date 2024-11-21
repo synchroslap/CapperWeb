@@ -110,14 +110,25 @@ createApp({
                     }
                 }
 
-                // Generate and download zip
+                // Generate zip blob
                 const blob = await zip.generateAsync({type: 'blob'});
+                
+                // Create object URL for the blob
+                const url = URL.createObjectURL(blob);
+                
+                // Create invisible download link
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
+                link.style.display = 'none';
+                link.href = url;
                 link.download = `${this.projectName}_project.zip`;
+                
+                // Add to document, click it, then clean up
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+                
+                // Clean up the URL object
+                setTimeout(() => URL.revokeObjectURL(url), 100);
                 
                 this.output = 'Project exported successfully!';
             } catch (error) {
