@@ -112,25 +112,53 @@ createApp({
 
                 // Generate zip blob
                 const blob = await zip.generateAsync({type: 'blob'});
-                
-                // Create object URL for the blob
-                const url = URL.createObjectURL(blob);
-                
-                // Create invisible download link
-                const link = document.createElement('a');
-                link.style.display = 'none';
-                link.href = url;
-                link.download = `${this.projectName}_project.zip`;
-                
-                // Add to document, click it, then clean up
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                
-                // Clean up the URL object
-                setTimeout(() => URL.revokeObjectURL(url), 100);
-                
-                this.output = 'Project exported successfully!';
+                const fileName = `${this.projectName}_project.zip`;
+
+                try {
+                    // Try using the native saveAs function first (Firefox)
+                    if (window.navigator.msSaveOrOpenBlob || window.navigator.msSaveBlob) {
+                        if (window.navigator.msSaveOrOpenBlob) {
+                            window.navigator.msSaveOrOpenBlob(blob, fileName);
+                        } else {
+                            window.navigator.msSaveBlob(blob, fileName);
+                        }
+                    } 
+                    // Then try the showSaveFilePicker API (Chrome, Edge)
+                    else if ('showSaveFilePicker' in window) {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: fileName,
+                            types: [{
+                                description: 'ZIP Archive',
+                                accept: {'application/zip': ['.zip']}
+                            }]
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                    }
+                    // Finally try the saveAs function from FileSaver.js (Firefox fallback)
+                    else {
+                        const saveAs = window.saveAs || ((blob, fileName) => {
+                            const a = document.createElement('a');
+                            const url = URL.createObjectURL(blob);
+                            a.href = url;
+                            a.download = fileName;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        });
+                        saveAs(blob, fileName);
+                    }
+                    
+                    this.output = 'Project exported successfully!';
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        // User cancelled the save dialog
+                        return;
+                    }
+                    throw error;
+                }
             } catch (error) {
                 this.output = `Export error: ${error.message}`;
                 console.error('Export error:', error);
