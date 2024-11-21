@@ -20,7 +20,6 @@ entire Python runtime into a browser). Your completed caption should display at 
 and save image to download your caption.
 
 ## Roadmap
-- Add project import/export feature
 - Fix styling and formatting of web UI
 - Spoonfeed guide 
 
