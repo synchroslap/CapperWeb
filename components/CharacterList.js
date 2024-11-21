@@ -209,7 +209,7 @@ const CharacterList = {
 
             fontColorPicker.on('save', (color) => {
                 if (color) {
-                    this.characters[index].fontColor = color.toRGBA().toString();
+                    this.characters[index].fontColor = color.toHEXA().toString();
                     this.updateCharacters();
                 }
                 fontColorPicker.hide();
@@ -217,7 +217,7 @@ const CharacterList = {
 
             strokeColorPicker.on('save', (color) => {
                 if (color) {
-                    this.characters[index].strokeColor = color.toRGBA().toString();
+                    this.characters[index].strokeColor = color.toHEXA().toString();
                     this.updateCharacters();
                 }
                 strokeColorPicker.hide();
