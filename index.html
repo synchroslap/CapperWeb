@@ -46,7 +46,7 @@
         </div>
 
         <div class="row g-4">
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <!-- Image Upload -->
                 <h3 class="h5 mb-3">Image Upload</h3>
                 <div class="mb-3">
@@ -65,7 +65,7 @@
                 <!-- Image Options Section -->
                 <div class="bg-light rounded p-3 row">
                     <!-- Background Color -->
-                    <div class="mb-0 col-4">
+                    <div class="mb-0 col-md-4 col-sm-6">
                         <label class="form-label small fw-medium text-secondary mb-2">Background Color</label>
                         <div class="d-flex align-items-center gap-2">
                             <div id="bgColorPicker" class="border rounded bg-white"></div>
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <!-- Image Output File Format -->
-                    <div class="col-4">
+                    <div class="col-md-4 col-sm-6">
                         <label class="form-label small fw-medium text-secondary mb-2">Output Image Format</label>
                         <select class="form-select form-select-sm" v-model="outputFormat">
                             <option value="png">PNG</option>
@@ -81,7 +81,7 @@
                         </select>
                     </div>
                     <!-- Image Quality -->
-                    <div class="col-3">
+                    <div class="col-md-4 col-sm-6">
                         <label class="form-label small fw-medium text-secondary mb-1">Image Quality</label>
                         <input type="number" class="form-control form-control-sm w-auto" 
                            v-model="outputQuality" 
@@ -91,7 +91,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <h3 class="h5 mb-3">Text Editor</h3>
                 <div class="mb-3">
                     <textarea v-model="textContent" class="form-control" style="height: 400px; min-height: 400px; resize: vertical;" placeholder="Enter your text here..."></textarea>
@@ -100,7 +100,7 @@
                 <div class="bg-light rounded p-3">
                     <div class="row g-3">
                         <!-- Position Dropdown -->
-                        <div class="col-3">
+                        <div class="col-lg-3 col-sm-6">
                             <label class="form-label small fw-medium text-secondary mb-1">Text Position</label>
                             <select class="form-select form-select-sm" v-model="textPosition">
                                 <option value="left">Left</option>
@@ -110,7 +110,7 @@
                         </div>
 
                         <!-- Alignment Dropdown -->
-                        <div class="col-3">
+                        <div class="col-lg-3 col-sm-6">
                             <label class="form-label small fw-medium text-secondary mb-1">Text Alignment</label>
                             <select class="form-select form-select-sm" v-model="textAlignment">
                                 <option value="left">Left</option>
@@ -120,7 +120,7 @@
                         </div>
 
                         <!-- Padding -->
-                        <div class="col-3">
+                        <div class="col-lg-3 col-sm-6">
                             <label class="form-label small fw-medium text-secondary mb-1">Padding</label>
                             <input type="number" class="form-control form-control-sm w-auto" 
                                v-model="textPadding" 
@@ -129,7 +129,7 @@
                         </div>
 
                         <!-- Line Spacing -->
-                        <div class="col-3">
+                        <div class="col-lg-3 col-sm-6">
                             <label class="form-label small fw-medium text-secondary mb-1">Line Spacing</label>
                             <input type="number" class="form-control form-control-sm w-auto" 
                                v-model="textLineSpacing" 
@@ -153,7 +153,7 @@
                 </div>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <character-list 
                     v-model:characters="characters"
                     :available-fonts="availableFonts"
