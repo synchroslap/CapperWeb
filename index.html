@@ -26,21 +26,21 @@
 <body class="py-4">
     <div id="app" class="container-fluid">
         <!-- Project Name Input -->
-        <div class="row project-name-container">
+        <div class="row mb-4">
             <div class="col-4">
-                <div class="form-group">
-                    <label class="form-label">Project Name</label>
-                    <input type="text" class="form-control" v-model="projectName" placeholder="Enter project name">
+                <div class="mb-3">
+                    <label class="form-label small fw-medium text-secondary mb-1">Project Name</label>
+                    <input type="text" class="form-control form-control-sm" v-model="projectName" placeholder="Enter project name">
                 </div>
             </div>
             <!-- Export/Import Buttons -->
             <div class="col-8 d-flex align-items-end justify-content-end">
-                <button @click="exportProject" class="btn btn-outline-primary me-2">
-                    <i class="bi bi-download"></i> Export Project
+                <button @click="exportProject" class="btn btn-outline-primary btn-sm me-2 d-inline-flex align-items-center">
+                    <i class="bi bi-download me-1"></i> Export Project
                 </button>
-                <div class="btn btn-outline-secondary position-relative">
-                    <i class="bi bi-upload"></i> Import Project
-                    <input type="file" @change="importProject" accept=".zip" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor: pointer;">
+                <div class="btn btn-outline-secondary btn-sm position-relative d-inline-flex align-items-center">
+                    <i class="bi bi-upload me-1"></i> Import Project
+                    <input type="file" @change="importProject" accept=".zip" class="position-absolute top-0 start-0 w-100 h-100 opacity-0">
                 </div>
             </div>
         </div>
@@ -48,21 +48,26 @@
         <div class="row g-4">
             <div class="col-md-4">
                 <!-- Image Upload -->
-                <h3 class="mb-3">Image Upload</h3>
-                <div class="form-group">
-                    <div class="image-preview" id="imagePreview">
-                        <img v-if="imagePreview" :src="imagePreview" alt="Preview">
-                        <span v-else>No image selected</span>
+                <h3 class="h5 mb-3">Image Upload</h3>
+                <div class="mb-3">
+                    <div class="border border-2 border-light-subtle rounded d-flex align-items-center justify-content-center p-3 bg-light" style="min-height: 300px;">
+                        <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="img-fluid" style="max-height: 280px; object-fit: contain;">
+                        <span v-else class="text-secondary">No image selected</span>
                     </div>
-                    <input type="file" @change="handleImageUpload" accept="image/*" class="form-control">
+                    <div class="mt-2">
+                        <label class="btn btn-outline-secondary btn-sm w-100">
+                            <i class="bi bi-image me-1"></i> Choose Image
+                            <input type="file" @change="handleImageUpload" accept="image/*" class="d-none">
+                        </label>
+                    </div>
                 </div>
                 
                 <!-- Background Color Section -->
-                <div class="bg-color-section">
-                    <div class="form-group mb-0">
-                        <label class="form-label">Background Color</label>
-                        <div class="bg-color-container">
-                            <div id="bgColorPicker" class="color-picker-container"></div>
+                <div class="bg-light rounded p-3">
+                    <div class="mb-0">
+                        <label class="form-label small fw-medium text-secondary mb-2">Background Color</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <div id="bgColorPicker" class="border rounded bg-white"></div>
                             <small class="text-muted">Click to choose color</small>
                         </div>
                     </div>
@@ -70,17 +75,17 @@
             </div>
 
             <div class="col-md-4">
-                <h3 class="mb-3">Text Editor</h3>
-                <div class="form-group">
-                    <textarea v-model="textContent" class="form-control text-editor-tall" placeholder="Enter your text here..."></textarea>
+                <h3 class="h5 mb-3">Text Editor</h3>
+                <div class="mb-3">
+                    <textarea v-model="textContent" class="form-control" style="height: 400px; min-height: 400px; resize: vertical;" placeholder="Enter your text here..."></textarea>
                 </div>
                 
-                <div class="text-controls">
-                    <div class="row">
+                <div class="bg-light rounded p-3">
+                    <div class="row g-3">
                         <!-- Position Dropdown -->
-                        <div class="form-group col-6">
-                            <label class="form-label">Text Position</label>
-                            <select class="form-select" v-model="textPosition">
+                        <div class="col-6">
+                            <label class="form-label small fw-medium text-secondary mb-1">Text Position</label>
+                            <select class="form-select form-select-sm" v-model="textPosition">
                                 <option value="left">Left</option>
                                 <option value="right">Right</option>
                                 <option value="split">Split</option>
@@ -88,9 +93,9 @@
                         </div>
 
                         <!-- Alignment Dropdown -->
-                        <div class="form-group col-6">
-                            <label class="form-label">Text Alignment</label>
-                            <select class="form-select" v-model="textAlignment">
+                        <div class="col-6">
+                            <label class="form-label small fw-medium text-secondary mb-1">Text Alignment</label>
+                            <select class="form-select form-select-sm" v-model="textAlignment">
                                 <option value="left">Left</option>
                                 <option value="right">Right</option>
                                 <option value="center">Center</option>
@@ -99,17 +104,15 @@
                     </div>
 
                     <!-- Credits Section -->
-                    <div class="form-group">
-                        <div class="credits-section">
-                            <label class="form-label">Credits</label>
-                            <textarea v-model="credits" class="form-control credits-input" placeholder="Enter credits..."></textarea>
-                            <select class="form-select" v-model="creditsPosition">
-                                <option value="tl">Top Left</option>
-                                <option value="tr">Top Right</option>
-                                <option value="bl">Bottom Left</option>
-                                <option value="br">Bottom Right</option>
-                            </select>
-                        </div>
+                    <div class="bg-white rounded border p-3 mt-3">
+                        <label class="form-label small fw-medium text-secondary mb-1">Credits</label>
+                        <textarea v-model="credits" class="form-control form-control-sm mb-2" style="height: 100px; resize: none;" placeholder="Enter credits..."></textarea>
+                        <select class="form-select form-select-sm" v-model="creditsPosition">
+                            <option value="tl">Top Left</option>
+                            <option value="tr">Top Right</option>
+                            <option value="bl">Bottom Left</option>
+                            <option value="br">Bottom Right</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -119,18 +122,19 @@
                     v-model:characters="characters"
                     :available-fonts="availableFonts"
                     @insert-tag="insertCharacterTag"
-                    @font-upload="handleFontUpload">
+                    @font-upload="handleFontUpload"
+                    class="character-list">
                 </character-list>
             </div>
 
-            <div class="col-12 generate-button-container">
-                <button @click="generate" class="btn btn-success generate-btn" :disabled="isGenerating">
-                    <span v-if="isGenerating" class="spinner"></span>
+            <div class="col-12 mt-4 text-center">
+                <button @click="generate" class="btn btn-success px-4" :disabled="isGenerating">
+                    <span v-if="isGenerating" class="spinner-border spinner-border-sm me-2"></span>
                     Generate
                 </button>
             </div>
-            <div class="col-12 output-container">
-                <div class="bg-light p-3 rounded row" v-html="output"></div>
+            <div class="col-12">
+                <div class="bg-light p-3 rounded" v-html="output"></div>
             </div>
         </div>
     </div>

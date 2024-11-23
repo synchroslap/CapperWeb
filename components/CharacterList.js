@@ -1,59 +1,57 @@
 const CharacterList = {
     name: 'CharacterList',
     template: `
-    <div>
+    <div class="character-list-container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="mb-0">Characters</h3>
-            <button class="btn btn-primary" @click="addCharacter">
-                <i class="bi bi-plus"></i> Add Character
+            <h3 class="h5 mb-0">Characters</h3>
+            <button class="btn btn-primary btn-sm" @click="addCharacter">
+                <i class="bi bi-plus-lg me-1"></i> Add Character
             </button>
         </div>
         <div class="mb-3">
-            <label class="form-label">Upload Font</label>
-            <input type="file" 
-                   class="form-control" 
-                   @change="handleFontUpload" 
-                   accept=".ttf"
-                   title="Upload TTF Font">
+            <label class="form-label small fw-medium text-secondary mb-1">Upload Font</label>
+            <label class="btn btn-outline-secondary btn-sm w-100">
+                <i class="bi bi-file-earmark-font me-1"></i> Choose Font File
+                <input type="file" @change="handleFontUpload" accept=".ttf" class="d-none">
+            </label>
         </div>
         <div class="speaker-list">
             <div v-for="(character, index) in characters" 
                  :key="character.id || index" 
-                 class="speaker-entry">
-                <div class="name-preview-row">
-                    <div class="name-input">
-                        <input type="text" class="form-control speaker-name" 
+                 class="speaker-entry bg-white rounded p-3 mb-3">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="flex-grow-1">
+                        <input type="text" class="form-control form-control-sm" 
                                v-model="character.name" 
                                placeholder="Character Name"
                                @input="updateCharacters">
                     </div>
-                    <div class="font-preview" :style="getPreviewStyle(character)">
+                    <div class="font-preview px-2 py-1 bg-light border rounded text-nowrap overflow-hidden" :style="getPreviewStyle(character)">
                         {{ character.name }}
                     </div>
                 </div>
-                <div class="format-controls">
-                    <div class="control-group insert-btn-group">
-                        <label class="form-label">&nbsp;</label>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-secondary insert-btn" 
-                                    @click="$emit('insert-tag', character.name)"
-                                    title="Insert character tag">Insert</button>
-                            <button class="btn btn-danger" 
-                                    @click="removeCharacter(index)"
-                                    title="Remove character">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                <div class="d-flex flex-wrap gap-3 align-items-end">
+                    <div>
+                        <button class="btn btn-secondary btn-sm me-1" 
+                                @click="$emit('insert-tag', character.name)"
+                                title="Insert character tag">
+                            <i class="bi bi-plus-lg me-1"></i>Insert
+                        </button>
+                        <button class="btn btn-danger btn-sm" 
+                                @click="removeCharacter(index)"
+                                title="Remove character">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </div>
-                    <div class="control-group">
-                        <label class="form-label">Color</label>
+                    <div>
+                        <label class="form-label small fw-medium text-secondary mb-1">Color</label>
                         <div class="color-picker-wrapper">
-                            <div :class="'font-color-picker-' + getSafeId(character)"></div>
+                            <div :class="'font-color-picker-' + getSafeId(character)" class="border rounded"></div>
                         </div>
                     </div>
-                    <div class="control-group">
-                        <label class="form-label">Font</label>
-                        <select class="form-select font-type-select" 
+                    <div class="flex-grow-1">
+                        <label class="form-label small fw-medium text-secondary mb-1">Font</label>
+                        <select class="form-select form-select-sm" 
                                 v-model="character.fontType" 
                                 @change="updateCharacters"
                                 title="Font Type">
@@ -62,26 +60,28 @@ const CharacterList = {
                                     :value="font.path">{{ font.name }}</option>
                         </select>
                     </div>
-                    <div class="control-group">
-                        <label class="form-label">Height</label>
-                        <input type="number" class="form-control number-input" 
+                    <div>
+                        <label class="form-label small fw-medium text-secondary mb-1">Height</label>
+                        <input type="number" class="form-control form-control-sm" 
                                v-model="character.fontHeight" 
                                @input="updateCharacters"
                                min="0" max="100" step="0.1" 
-                               title="Font Height">
+                               title="Font Height"
+                               style="width: 80px;">
                     </div>
-                    <div class="control-group">
-                        <label class="form-label">Stroke</label>
-                        <input type="number" class="form-control number-input" 
+                    <div>
+                        <label class="form-label small fw-medium text-secondary mb-1">Stroke</label>
+                        <input type="number" class="form-control form-control-sm" 
                                v-model="character.strokeWidth" 
                                @input="updateCharacters"
                                min="0" max="10" step="0.1" 
-                               title="Stroke Width">
+                               title="Stroke Width"
+                               style="width: 80px;">
                     </div>
-                    <div class="control-group">
-                        <label class="form-label">Stroke Color</label>
+                    <div>
+                        <label class="form-label small fw-medium text-secondary mb-1">Stroke Color</label>
                         <div class="color-picker-wrapper">
-                            <div :class="'stroke-color-picker-' + getSafeId(character)"></div>
+                            <div :class="'stroke-color-picker-' + getSafeId(character)" class="border rounded"></div>
                         </div>
                     </div>
                 </div>
@@ -113,7 +113,6 @@ const CharacterList = {
 
     methods: {
         getSafeId(character) {
-            // Convert any ID to a CSS-safe class name by removing invalid characters
             return `id${String(character.id || '').replace(/[^a-zA-Z0-9]/g, '')}`;
         },
 
@@ -128,7 +127,7 @@ const CharacterList = {
             const newCharNum = this.characters.length + 1;
             const defaultFont = this.availableFonts.length > 0 ? this.availableFonts[0].path : '';
             const newCharacter = {
-                id: Math.floor(Date.now()), // Use integer timestamp
+                id: Math.floor(Date.now()),
                 name: `Character${newCharNum}`,
                 fontType: defaultFont,
                 fontHeight: 1,
@@ -224,7 +223,6 @@ const CharacterList = {
             };
 
             try {
-                // Clean up existing pickers if they exist
                 this.cleanupColorPicker(character.id);
 
                 const fontColorPicker = Pickr.create({
@@ -268,15 +266,12 @@ const CharacterList = {
         },
 
         initializeAllColorPickers() {
-            // Ensure all characters have IDs first
             this.ensureCharacterIds();
 
-            // Clear any existing timeout
             if (this.initializationTimeout) {
                 clearTimeout(this.initializationTimeout);
             }
 
-            // Wait for Vue to finish rendering
             this.initializationTimeout = setTimeout(() => {
                 this.$nextTick(() => {
                     this.characters.forEach(character => {
