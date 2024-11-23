@@ -83,7 +83,7 @@
                 <div class="bg-light rounded p-3">
                     <div class="row g-3">
                         <!-- Position Dropdown -->
-                        <div class="col-6">
+                        <div class="col-3">
                             <label class="form-label small fw-medium text-secondary mb-1">Text Position</label>
                             <select class="form-select form-select-sm" v-model="textPosition">
                                 <option value="left">Left</option>
@@ -93,7 +93,7 @@
                         </div>
 
                         <!-- Alignment Dropdown -->
-                        <div class="col-6">
+                        <div class="col-3">
                             <label class="form-label small fw-medium text-secondary mb-1">Text Alignment</label>
                             <select class="form-select form-select-sm" v-model="textAlignment">
                                 <option value="left">Left</option>
@@ -101,12 +101,31 @@
                                 <option value="center">Center</option>
                             </select>
                         </div>
+
+                        <!-- Padding -->
+                        <div class="col-3">
+                            <label class="form-label small fw-medium text-secondary mb-1">Padding</label>
+                            <input type="number" class="form-control form-control-sm w-auto" 
+                               v-model="textPadding" 
+                               min="0" max="100" step="0.1" 
+                               title="Padding">
+                        </div>
+
+                        <!-- Line Spacing -->
+                        <div class="col-3">
+                            <label class="form-label small fw-medium text-secondary mb-1">Line Spacing</label>
+                            <input type="number" class="form-control form-control-sm w-auto" 
+                               v-model="textLineSpacing" 
+                               min="0" max="100" step="0.1" 
+                               title="Line Spacing">
+                        </div>
                     </div>
 
                     <!-- Credits Section -->
                     <div class="bg-white rounded border p-3 mt-3">
                         <label class="form-label small fw-medium text-secondary mb-1">Credits</label>
                         <textarea v-model="credits" class="form-control form-control-sm mb-2" style="height: 100px; resize: none;" placeholder="Enter credits..."></textarea>
+                        <label class="form-label small fw-medium text-secondary mb-1">Credits Position</label>
                         <select class="form-select form-select-sm" v-model="creditsPosition">
                             <option value="tl">Top Left</option>
                             <option value="tr">Top Right</option>

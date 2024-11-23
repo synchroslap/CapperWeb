@@ -47,6 +47,8 @@ createApp({
             textContent: '',
             textPosition: 'left',
             textAlignment: 'center',
+            textPadding: 1,
+            textLineSpacing: 0.2,
             credits: '',
             creditsPosition: 'br',
             backgroundColor: '#aaaaaa',
@@ -87,6 +89,8 @@ createApp({
                     text: {
                         text_box_pos: this.textPosition,
                         alignment: this.textAlignment,
+                        padding: this.textPadding,
+                        line_spacing: this.textLineSpacing,
                         credits_pos: this.creditsPosition,
                         credits: this.credits.split('\n')
                     },
@@ -512,6 +516,8 @@ createApp({
                         text: 'text.txt',
                         text_box_pos: this.textPosition,
                         alignment: this.textAlignment,
+                        padding: this.textPadding,
+                        line_spacing: this.textLineSpacing,
                         credits_pos: this.creditsPosition,
                         credits: this.credits.split('\n')
                     },
