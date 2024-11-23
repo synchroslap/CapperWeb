@@ -36,42 +36,16 @@
     background: #dc3545;
 }
 
-/* File input cursor */
-input[type="file"] {
-    cursor: pointer;
-}
-
-/* Generated output container */
-.generated-output img {
-    max-width: 100%;
-    height: auto;
-}
-
 /* Character list customizations */
 .character-list-container {
     max-height: calc(100vh - 300px);
     overflow-y: auto;
 }
 
-.speaker-entry {
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-.speaker-entry:last-child {
-    margin-bottom: 0;
-}
-
 .font-preview {
     min-width: 100px;
     max-width: 150px;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 /* Color picker wrapper */
@@ -80,12 +54,12 @@ input[type="file"] {
     height: 32px;
 }
 
-/* Number input width */
-input[type="number"].form-control-sm {
-    width: 80px;
-}
-
-/* Font select min-width */
+/* Form select min-width */
 select.form-select-sm {
     min-width: 150px;
+}
+
+/* Number inputs width */
+.form-control-sm.w-auto {
+    width: 80px !important;
 }

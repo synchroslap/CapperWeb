@@ -18,7 +18,7 @@ const CharacterList = {
         <div class="speaker-list">
             <div v-for="(character, index) in characters" 
                  :key="character.id || index" 
-                 class="speaker-entry bg-white rounded p-3 mb-3">
+                 class="speaker-entry bg-light rounded p-3 mb-3">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="flex-grow-1">
                         <input type="text" class="form-control form-control-sm" 
@@ -61,22 +61,20 @@ const CharacterList = {
                         </select>
                     </div>
                     <div>
-                        <label class="form-label small fw-medium text-secondary mb-1">Height</label>
-                        <input type="number" class="form-control form-control-sm" 
+                        <label class="form-label small fw-medium text-secondary mb-1">Rel. Height</label>
+                        <input type="number" class="form-control form-control-sm w-auto" 
                                v-model="character.fontHeight" 
                                @input="updateCharacters"
                                min="0" max="100" step="0.1" 
-                               title="Font Height"
-                               style="width: 80px;">
+                               title="Font Height">
                     </div>
                     <div>
                         <label class="form-label small fw-medium text-secondary mb-1">Stroke</label>
-                        <input type="number" class="form-control form-control-sm" 
+                        <input type="number" class="form-control form-control-sm w-auto" 
                                v-model="character.strokeWidth" 
                                @input="updateCharacters"
                                min="0" max="10" step="0.1" 
-                               title="Stroke Width"
-                               style="width: 80px;">
+                               title="Stroke Width">
                     </div>
                     <div>
                         <label class="form-label small fw-medium text-secondary mb-1">Stroke Color</label>
