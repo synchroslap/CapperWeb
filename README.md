@@ -21,8 +21,7 @@ and save image to download your caption.
 
 Note that credits will use the the text settings of whatever your first character is.
 
-## Roadmap
-- Fix styling and formatting of web UI
+## To Do List
 - Spoonfeed guide 
 
 
