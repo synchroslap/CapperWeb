@@ -52,6 +52,8 @@ createApp({
             credits: '',
             creditsPosition: 'br',
             backgroundColor: '#aaaaaa',
+            outputFormat: "png",
+            outputQuality: 100,
             output: '',
             imageName: '',
             imagePreview: null,
@@ -93,6 +95,10 @@ createApp({
                         line_spacing: this.textLineSpacing,
                         credits_pos: this.creditsPosition,
                         credits: this.credits.split('\n')
+                    },
+                    output: {
+                        output_img_format: this.outputFormat,
+                        output_img_quality: this.outputQuality
                     },
                     characters: this.characters
                 };
@@ -237,12 +243,18 @@ createApp({
                 // Restore text settings
                 this.textPosition = settings.text.text_box_pos;
                 this.textAlignment = settings.text.alignment;
+                this.textPadding = settings.text.padding;
+                this.textLineSpacing = settings.text.line_spacing;
                 this.creditsPosition = settings.text.credits_pos;
                 this.credits = settings.text.credits.join('\n');
                 
                 // Restore background color
                 this.backgroundColor = settings.image.bg_color;
                 this.bgColorPicker.setColor(settings.image.bg_color);
+
+                // Restore image format and quality
+                this.outputFormat = settings.output.output_img_format;
+                this.outputQuality = settings.output.output_img_quality;
         
         // Debug logging for fonts
         console.log('All zip contents:', Object.keys(contents.files));
@@ -524,7 +536,9 @@ createApp({
                     output: {
                         base_filename: this.projectName,
                         output_directory: './',
-                        outputs: ['caption']
+                        outputs: ['caption'],
+                        output_img_format: this.outputFormat,
+                        output_img_quality: this.outputQuality
                     },
                     characters: fontSettings
                 };
@@ -539,10 +553,10 @@ createApp({
                 
                 // After successful generation, read and display the generated image
                 if (result.includes('Success')) {
-                    const generatedFileName = `${this.projectName}_cap.png`;
+                    const generatedFileName = `${this.projectName}_cap.${this.outputFormat}`;
                     try {
                         const imageData = pyodideInstance.FS.readFile(generatedFileName);
-                        const blob = new Blob([imageData], { type: 'image/png' });
+                        const blob = new Blob([imageData], { type: 'image/'+this.outputFormat });
                         this.generatedImage = URL.createObjectURL(blob);
                         this.output = `<div class="generated-output">
                             <img src="${this.generatedImage}" alt="Generated Caption" class="col-8 align-self-center">
