@@ -38,7 +38,7 @@ const CharacterList = {
                             <i class="bi bi-plus-lg me-1"></i>Insert
                         </button>
                         <button class="btn btn-danger btn-sm" 
-                                @click="removeCharacter(index)"
+                                @click="showDeleteModal(index)"
                                 title="Remove character">
                             <i class="bi bi-trash"></i>
                         </button>
@@ -85,6 +85,25 @@ const CharacterList = {
                 </div>
             </div>
         </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteCharacterModal" tabindex="-1" aria-labelledby="deleteCharacterModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteCharacterModalLabel">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" v-if="characterToDelete !== null">
+                        Are you sure you want to remove "{{ characters[characterToDelete].name }}"?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" @click="confirmDelete">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     `,
 
@@ -105,7 +124,9 @@ const CharacterList = {
     data() {
         return {
             colorPickers: {},
-            initializationTimeout: null
+            initializationTimeout: null,
+            characterToDelete: null,
+            deleteModal: null
         }
     },
 
@@ -137,13 +158,20 @@ const CharacterList = {
             this.$emit('update:characters', [...this.characters, newCharacter]);
         },
 
-        removeCharacter(index) {
-            if (confirm(`Are you sure you want to remove "${this.characters[index].name}"?`)) {
-                const character = this.characters[index];
+        showDeleteModal(index) {
+            this.characterToDelete = index;
+            this.deleteModal.show();
+        },
+
+        confirmDelete() {
+            if (this.characterToDelete !== null) {
+                const character = this.characters[this.characterToDelete];
                 this.cleanupColorPicker(character.id);
                 const updatedCharacters = [...this.characters];
-                updatedCharacters.splice(index, 1);
+                updatedCharacters.splice(this.characterToDelete, 1);
                 this.$emit('update:characters', updatedCharacters);
+                this.deleteModal.hide();
+                this.characterToDelete = null;
             }
         },
 
@@ -291,6 +319,7 @@ const CharacterList = {
 
     mounted() {
         this.initializeAllColorPickers();
+        this.deleteModal = new bootstrap.Modal(document.getElementById('deleteCharacterModal'));
     },
 
     beforeUnmount() {
@@ -298,6 +327,9 @@ const CharacterList = {
             clearTimeout(this.initializationTimeout);
         }
         this.cleanupAllColorPickers();
+        if (this.deleteModal) {
+            this.deleteModal.dispose();
+        }
     }
 };
 
