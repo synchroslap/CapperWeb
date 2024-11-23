@@ -482,6 +482,10 @@ createApp({
                     throw new Error('Please set the project name')
                 }
 
+                if (this.textContent.length == 0) {
+                    throw new Error('Please enter some text')
+                }
+
                 // Write text content to file
                 pyodideInstance.FS.writeFile('text.txt', this.textContent);
 
