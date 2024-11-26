@@ -18,7 +18,7 @@ const CharacterList = {
         <div class="speaker-list">
             <div v-for="(character, index) in characters" 
                  :key="character.id || index" 
-                 class="speaker-entry bg-light rounded p-3 mb-3">
+                 class="speaker-entry bg-body-secondary rounded p-3 mb-3">
                 <div class="d-flex align-items-center gap-2 mb-3">
                     <div class="flex-grow-1">
                         <input type="text" class="form-control form-control-sm" 
@@ -26,7 +26,7 @@ const CharacterList = {
                                placeholder="Character Name"
                                @input="updateCharacters">
                     </div>
-                    <div class="font-preview px-2 py-1 bg-light border rounded text-nowrap overflow-hidden" :style="getPreviewStyle(character)">
+                    <div class="font-preview px-2 py-1 bg-body border rounded text-nowrap overflow-hidden" :style="getPreviewStyle(character)">
                         {{ character.name }}
                     </div>
                 </div>
@@ -89,7 +89,7 @@ const CharacterList = {
         <!-- Delete Confirmation Modal -->
         <div class="modal fade" id="deleteCharacterModal" tabindex="-1" aria-labelledby="deleteCharacterModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-                <div class="modal-content">
+                <div class="modal-content bg-body">
                     <div class="modal-header">
                         <h5 class="modal-title" id="deleteCharacterModalLabel">Confirm Delete</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

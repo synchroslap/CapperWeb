@@ -35,6 +35,7 @@ createApp({
 
     data() {
         return {
+            darkMode: localStorage.getItem('darkMode') === 'true',
             projectName: '',
             characters: [{
                 name: 'Character1',
@@ -67,6 +68,11 @@ createApp({
     },
 
     methods: {
+        toggleTheme() {
+            document.documentElement.setAttribute('data-bs-theme', this.darkMode ? 'dark' : 'light');
+            localStorage.setItem('darkMode', this.darkMode);
+        },
+
         async exportProject() {
             try {
                 if (!this.selectedFile || !this.projectName) {
@@ -258,7 +264,7 @@ createApp({
         
         // Debug logging for fonts
         console.log('All zip contents:', Object.keys(contents.files));
-                
+        
                 // Import custom fonts
                 const fontFiles = Object.keys(contents.files).filter(path => 
                     path.startsWith('fonts/') && !path.endsWith('/') && path !== 'fonts/'
@@ -686,6 +692,8 @@ createApp({
             await this.initializePyodide();
             // Initialize background color picker
             this.initializeBackgroundColorPicker();
+            // Set initial theme
+            this.toggleTheme();
         } catch (error) {
             console.error('Failed to initialize app:', error);
         }

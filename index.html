@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="/cap.svg">
     <link rel="alternate icon" href="https://raw.githubusercontent.com/synchroslap/CapperWeb/refs/heads/main/cap.svg" type="image/svg+xml">
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Pickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css">
     <link href="styles.css" rel="stylesheet">
@@ -25,6 +25,16 @@
 </head>
 <body class="py-4">
     <div id="app" class="container-fluid">
+        <!-- Dark Mode Switch -->
+        <div class="theme-switch">
+            <div class="form-check form-switch d-flex align-items-center gap-2">
+                <input class="form-check-input" type="checkbox" role="switch" id="darkModeSwitch" v-model="darkMode" @change="toggleTheme">
+                <label class="form-check-label" for="darkModeSwitch">
+                    <i class="bi" :class="darkMode ? 'bi-moon-fill' : 'bi-sun-fill'"></i>
+                </label>
+            </div>
+        </div>
+
         <!-- Project Name Input -->
         <div class="row mb-4">
             <div class="col-4">
@@ -50,7 +60,7 @@
                 <!-- Image Upload -->
                 <h3 class="h5 mb-3">Image Upload</h3>
                 <div class="mb-3">
-                    <div class="border border-2 border-light-subtle rounded d-flex align-items-center justify-content-center p-3 bg-light" style="min-height: 300px;">
+                    <div class="border border-2 border-light-subtle rounded d-flex align-items-center justify-content-center p-3 bg-body-secondary" style="min-height: 300px;">
                         <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="img-fluid" style="max-height: 280px; object-fit: contain;">
                         <span v-else class="text-secondary">No image selected</span>
                     </div>
@@ -63,7 +73,7 @@
                 </div>
                 
                 <!-- Image Options Section -->
-                <div class="bg-light rounded p-3 row">
+                <div class="bg-body-secondary rounded p-3 row">
                     <!-- Background Color -->
                     <div class="mb-0 col-md-4 col-sm-6">
                         <label class="form-label small fw-medium text-secondary mb-2">Background Color</label>
@@ -97,7 +107,7 @@
                     <textarea v-model="textContent" class="form-control" style="height: 400px; min-height: 400px; resize: vertical;" placeholder="Enter your text here..."></textarea>
                 </div>
                 
-                <div class="bg-light rounded p-3">
+                <div class="bg-body-secondary rounded p-3">
                     <div class="row g-3">
                         <!-- Position Dropdown -->
                         <div class="col-lg-3 col-sm-6">
@@ -139,7 +149,7 @@
                     </div>
 
                     <!-- Credits Section -->
-                    <div class="bg-white rounded border p-3 mt-3">
+                    <div class="bg-body rounded border p-3 mt-3">
                         <label class="form-label small fw-medium text-secondary mb-1">Credits</label>
                         <textarea v-model="credits" class="form-control form-control-sm mb-2" style="height: 100px; resize: none;" placeholder="Enter credits..."></textarea>
                         <label class="form-label small fw-medium text-secondary mb-1">Credits Position</label>
@@ -170,12 +180,12 @@
                 </button>
             </div>
             <div class="col-12">
-                <div class="bg-light p-3 rounded" v-html="output"></div>
+                <div class="bg-body-secondary p-3 rounded" v-html="output"></div>
             </div>
         </div>
     </div>
     <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- App JS -->
     <script type="module" src="main.js"></script>
 </body>

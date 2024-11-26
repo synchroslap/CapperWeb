@@ -1,4 +1,4 @@
-/* Minimal required custom styles that can't be achieved with Bootstrap alone */
+/* Only keeping essential custom styles that can't be achieved with Bootstrap */
 
 /* Color picker customizations */
 .pickr {
@@ -62,4 +62,12 @@ select.form-select-sm {
 /* Number inputs width */
 .form-control-sm.w-auto {
     width: 80px !important;
+}
+
+/* Dark mode switch position */
+.theme-switch {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1030;
 }
